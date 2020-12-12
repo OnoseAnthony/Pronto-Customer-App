@@ -38,8 +38,13 @@ class OrderSummary extends StatelessWidget {
         margin: EdgeInsets.only(bottom: 20),
         child: FloatingActionButton(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => PaymentPage()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => PaymentPage(
+                            chargeAmount: _chargeAmount,
+                            type: 'pay',
+                          )));
             },
             backgroundColor: Colors.blue,
             elevation: 8,
@@ -361,24 +366,6 @@ class OrderSummary extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  statusWidget(bool isActive) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          Container(
-            height: 20,
-            width: 20,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isActive ? Colors.blue : Colors.grey[300],
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
+import 'package:fronto/Utils/cardInputFormatter.dart';
+import 'package:fronto/Utils/cardValidators.dart';
 
 buildTextField(String hintText, TextEditingController controller) {
   return Container(
@@ -36,104 +39,100 @@ buildNonEditTextField(String hintText, Function ontap) {
 }
 
 buildCreditCardNumberField(TextEditingController controller, String hintText) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(3.0),
-      border: Border.all(color: Colors.black26),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black54,
-          blurRadius: 6.0,
-          spreadRadius: 0.5,
-          offset: Offset(0.7, 0.7),
-        )
-      ],
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: TextFormField(
-        onChanged: (val) {},
-        controller: controller,
-        decoration: InputDecoration(
-            prefixIcon: getIcon(Icons.search, 14, Colors.black26),
-            hintText: hintText,
-            hintStyle: TextStyle(
-              color: Colors.grey[200],
-            ),
-            border: InputBorder.none,
-            contentPadding:
-                EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0)),
+  return TextFormField(
+    onChanged: (val) {},
+    controller: controller,
+    keyboardType: TextInputType.number,
+    inputFormatters: [
+      FilteringTextInputFormatter.digitsOnly,
+      new LengthLimitingTextInputFormatter(19),
+      new CardNumberInputFormatter()
+    ],
+    validator: validateCardNumWithLuhnAlgorithm,
+    decoration: InputDecoration(
+      contentPadding: EdgeInsets.symmetric(vertical: 18),
+      prefixIcon: getIcon(Icons.credit_card, 25, Colors.black),
+      hintText: hintText,
+      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
+      border: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.black),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.black),
       ),
     ),
   );
 }
 
-buildCvvNumberField(TextEditingController controller, String hintText) {
+buildCvvNumberField(
+    TextEditingController controller, String hintText, context) {
   return Container(
-    width: 60,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(3.0),
-      border: Border.all(color: Colors.black26),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black54,
-          blurRadius: 6.0,
-          spreadRadius: 0.5,
-          offset: Offset(0.7, 0.7),
-        )
+    width: MediaQuery.of(context).size.width * 0.35,
+    child: TextFormField(
+      keyboardType: TextInputType.number,
+      onChanged: (val) {},
+      controller: controller,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        new LengthLimitingTextInputFormatter(4),
       ],
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: TextFormField(
-        onChanged: (val) {},
-        controller: controller,
-        decoration: InputDecoration(
-            prefixIcon: getIcon(Icons.search, 14, Colors.black26),
-            hintText: hintText,
-            hintStyle: TextStyle(
-              color: Colors.grey[200],
-            ),
-            border: InputBorder.none,
-            contentPadding:
-                EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0)),
+      validator: validateCVV,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.only(left: 15),
+        hintText: hintText,
+        hintStyle: TextStyle(
+          color: Colors.grey[400],
+        ),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.black),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.black),
+        ),
       ),
     ),
   );
 }
 
-buildExpiryNumberField(TextEditingController controller, String hintText) {
+buildExpiryNumberField(TextEditingController controller, String hintText,
+    context) {
   return Container(
-    width: 40,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(3.0),
-      border: Border.all(color: Colors.black26),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black54,
-          blurRadius: 6.0,
-          spreadRadius: 0.5,
-          offset: Offset(0.7, 0.7),
-        )
+    width: MediaQuery
+        .of(context)
+        .size
+        .width * 0.35,
+    child: TextFormField(
+      onChanged: (val) {},
+      keyboardType: TextInputType.number,
+      controller: controller,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        new LengthLimitingTextInputFormatter(4),
+        new CardMonthInputFormatter()
       ],
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: TextFormField(
-        onChanged: (val) {},
-        controller: controller,
-        decoration: InputDecoration(
-            prefixIcon: getIcon(Icons.search, 14, Colors.black26),
-            hintText: hintText,
-            hintStyle: TextStyle(
-              color: Colors.grey[200],
-            ),
-            border: InputBorder.none,
-            contentPadding:
-                EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0)),
+      validator: validateDate,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.only(left: 15),
+        hintText: hintText,
+        hintStyle: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 12
+        ),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.black),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.black),
+        ),
       ),
     ),
   );

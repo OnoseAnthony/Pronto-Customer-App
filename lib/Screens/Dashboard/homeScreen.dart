@@ -37,7 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
     double size = MediaQuery.of(context).size.height;
     return Scaffold(
       key: _scaffoldKey,
-      drawer: buildDrawer(context),
+      drawer: buildDrawer(
+        context,
+      ),
       body: Stack(
         children: [
           GoogleMap(

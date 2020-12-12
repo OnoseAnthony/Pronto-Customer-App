@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fronto/Screens/Dashboard/paymentScreen.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/customListTile.dart';
 import 'package:fronto/SharedWidgets/text.dart';
@@ -44,13 +45,25 @@ buildDrawer(
               ),
               child: Column(
                 children: [
-                  buildCustomListTile(
-                      getIcon(Icons.credit_card, 22, Colors.black),
-                      buildTitlenSubtitleText('Payments', Colors.black, 16,
-                          FontWeight.normal, TextAlign.start, null),
-                      null,
-                      12.0,
-                      false),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PaymentPage(
+                                    chargeAmount: 1,
+                                    type: 'drawer',
+                                  )));
+                    },
+                    child: buildCustomListTile(
+                        getIcon(Icons.credit_card, 22, Colors.black),
+                        buildTitlenSubtitleText('Payments', Colors.black, 16,
+                            FontWeight.normal, TextAlign.start, null),
+                        null,
+                        12.0,
+                        false),
+                  ),
                   SizedBox(
                     height: 25.0,
                   ),
