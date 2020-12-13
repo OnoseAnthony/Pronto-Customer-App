@@ -5,6 +5,7 @@ import 'package:fronto/Services/mapServices.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/customListTile.dart';
 import 'package:fronto/SharedWidgets/text.dart';
+import 'package:fronto/SharedWidgets/tripTracker.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -180,7 +181,7 @@ class OrderSummary extends StatelessWidget {
                         20,
                         false),
                     SizedBox(
-                      height: 50,
+                      height: 30,
                     ),
                     Column(
                       children: [
@@ -196,11 +197,11 @@ class OrderSummary extends StatelessWidget {
                         SizedBox(
                           height: 10,
                         ),
-                        buildDestinationTracker(context),
+                        buildDestinationTracker(context, 0),
                       ],
                     ),
                     SizedBox(
-                      height: 40,
+                      height: 30,
                     ),
                     buildSubmitButton('EDIT INFORMATION', 5.0)
                   ],
@@ -286,63 +287,6 @@ class OrderSummary extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  buildDestinationTracker(context) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          height: 10,
-          width: 10,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.blue,
-          ),
-        ),
-        Container(
-          height: 2,
-          width: MediaQuery.of(context).size.height * 0.07,
-          color: Colors.blue,
-        ),
-        Container(
-          height: 25,
-          width: 22,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.blue,
-          ),
-          child: getIcon(Icons.message, 10, Colors.white),
-        ),
-        Container(
-          height: 2,
-          width: MediaQuery.of(context).size.height * 0.07,
-          color: Colors.grey[300],
-        ),
-        Container(
-          height: 10,
-          width: 10,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.grey[300],
-          ),
-        ),
-        Container(
-          height: 2,
-          width: MediaQuery.of(context).size.height * 0.08,
-          color: Colors.grey[300],
-        ),
-        Container(
-          height: 10,
-          width: 10,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.grey[300],
-          ),
-        ),
-      ],
     );
   }
 

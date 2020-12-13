@@ -43,8 +43,8 @@ dependencies:
   image_picker: ^0.6.7+14
   cached_network_image: ^2.4.1
   fluttertoast: ^7.1.1
-  pin_code_fields: ^6.0.1
   line_awesome_flutter: ^1.0.1
+  country_list_pick: ^1.0.1+2
 
 
 

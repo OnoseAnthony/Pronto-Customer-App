@@ -20,11 +20,6 @@ class CardAssistant {
       ..reference = reference
       ..card = paymentCard;
 
-    print('AWAITING PAYSTACK PLUGIN');
-    print('AWAITING PAYSTACK PLUGIN');
-    print('AWAITING PAYSTACK PLUGIN');
-    print('AWAITING PAYSTACK PLUGIN');
-    print('AWAITING PAYSTACK PLUGIN');
 
     CheckoutResponse response = await PaystackPlugin.chargeCard(
       context,
@@ -76,11 +71,6 @@ handleOnSuccess(bool loading, Function function) {
   loading = false;
   function;
   print("success");
-  print("success");
-  print("success");
-  print("success");
-  print("success");
-  print("success");
   // _showDialog();
 }
 
@@ -88,11 +78,6 @@ handleOnError(bool loading, Function function) {
   loading = false;
   function;
   print("error");
-  print("error");
-  print("error");
-  print("error");
-  print("error");
-  print("error");
-  print("error");
+
   // _showErrorDialog();
 }

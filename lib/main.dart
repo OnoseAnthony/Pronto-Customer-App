@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fronto/DataHandler/appData.dart';
-import 'package:fronto/Screens/Dashboard/homeScreen.dart';
+import 'package:fronto/Screens/onboarding/splashScreen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -16,9 +16,9 @@ class MyApp extends StatelessWidget {
         title: 'Fronto',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: HomeScreen(),
+            primarySwatch: Colors.blue,
+            visualDensity: VisualDensity.adaptivePlatformDensity),
+        home: SplashScreen(),
       ),
     );
   }
