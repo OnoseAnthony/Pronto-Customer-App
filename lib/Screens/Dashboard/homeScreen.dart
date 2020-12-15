@@ -3,16 +3,21 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fronto/DataHandler/appData.dart';
+import 'package:fronto/Models/address.dart';
 import 'package:fronto/Screens/Dashboard/searchScreen.dart';
 import 'package:fronto/Services/mapServices.dart';
+import 'package:fronto/Services/requestAssistant.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/customListTile.dart';
+import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/drawer.dart';
+import 'package:fronto/SharedWidgets/predictedAddressTile.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/SharedWidgets/textFormField.dart';
 import 'package:fronto/constants.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -35,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     double size = MediaQuery.of(context).size.height;
+
     return Scaffold(
       key: _scaffoldKey,
       drawer: buildDrawer(
@@ -54,11 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
               _googleMapController.complete(controller);
               _newGoogleMapController = controller;
 
+              _getUserLocation();
+
               setState(() {
                 _locationButton = true;
                 kMapBottomPadding = size * 0.39;
               });
-              _getUserLocation();
             },
           ),
           Positioned(
@@ -118,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       TextAlign.start,
                       null),
 
-                  // SizedBox(height: 18,),
+
 
                   buildNonEditTextField(
                       'Address',
@@ -146,11 +153,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             buildTitlenSubtitleText('Location', Colors.black,
                                 13, FontWeight.bold, TextAlign.start, null),
                             buildTitlenSubtitleText(
-                                Provider.of<AppData>(context).pickUpLocation !=
-                                        null
-                                    ? Provider.of<AppData>(context)
-                                        .pickUpLocation
-                                        .placeName
+                                Provider
+                                    .of<AppData>(context)
+                                    .pickUpLocation !=
+                                    null
+                                    ? Provider
+                                    .of<AppData>(context)
+                                    .pickUpLocation
+                                    .placeName
                                     : "unknown location",
                                 Colors.grey,
                                 12,
@@ -160,7 +170,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                      getIcon(Icons.edit, 20, Colors.black54),
+
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => PickUpScreen()));
+                        },
+                        child: getIcon(Icons.edit, 20, Colors.black54),
+                      ),
                       5.0,
                       true),
 
@@ -170,7 +187,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   Flexible(
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        showToast(context, 'Please select package destination',
+                            Colors.red);
+                      },
                       child: buildSubmitButton('NEXT', 25.0),
                     ),
                   ),
@@ -189,10 +209,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _currentUserPosition = position;
 
     LatLng _userLatitudeLongitudePosition =
-        LatLng(_currentUserPosition.latitude, _currentUserPosition.longitude);
+    LatLng(_currentUserPosition.latitude, _currentUserPosition.longitude);
 
     CameraPosition _cameraPosition =
-        CameraPosition(target: _userLatitudeLongitudePosition, zoom: 15);
+    CameraPosition(target: _userLatitudeLongitudePosition, zoom: 15);
     _newGoogleMapController
         .animateCamera(CameraUpdate.newCameraPosition(_cameraPosition));
 
@@ -200,3 +220,205 @@ class _HomeScreenState extends State<HomeScreen> {
         _currentUserPosition, context);
   }
 }
+
+
+class PickUpScreen extends StatefulWidget {
+  @override
+  _PickUpScreenState createState() => _PickUpScreenState();
+}
+
+class _PickUpScreenState extends State<PickUpScreen> {
+
+  TextEditingController pickUpController = TextEditingController();
+  List<AddressPredictions> predictedDestinationAddressList = [];
+
+  @override
+  void dispose() {
+    pickUpController.dispose();
+    super.dispose();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    double size = MediaQuery
+        .of(context)
+        .size
+        .height;
+
+    pickUpController.text = Provider
+        .of<AppData>(context)
+        .pickUpLocation != null
+        ? Provider
+        .of<AppData>(context)
+        .pickUpLocation
+        .placeName
+        : "unknown location";
+
+    return Scaffold(
+      body: Stack(
+        children: [
+
+          Container(),
+
+          Positioned.fill(
+            child: Material(
+              elevation: 10,
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20), topLeft: Radius.circular(20)),
+              child: ListView(
+                physics: ClampingScrollPhysics(),
+                padding: EdgeInsets.only(
+                    top: size * 0.1, left: 15, right: 20, bottom: size * 0.05),
+                children: [
+
+                  predictedDestinationAddressList.length > 0
+                      ? SizedBox(
+                    height: 80,
+                  )
+                      : SizedBox(
+                    height: 55,
+                  ),
+                  predictedDestinationAddressList.length > 0
+                      ? ListView.builder(
+                    padding: EdgeInsets.zero,
+                    scrollDirection: Axis.vertical,
+                    itemCount: predictedDestinationAddressList.length,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      return PredictedAddressTile(
+                        addressPredictions:
+                        predictedDestinationAddressList[index],
+                        label: 'pickUp',
+                      );
+                    },
+                  )
+                      : Container(),
+
+                ],
+              ),
+            ),
+          ),
+
+
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: _searchScreen(size),
+          ),
+
+        ],
+      ),
+    );
+  }
+
+  _searchScreen(double size) {
+    return Material(
+      elevation: 5,
+      child: Column(
+        children: [
+          SizedBox(
+            height: size * 0.07,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: getIcon(LineAwesomeIcons.times, 25, Colors.black),
+                ),
+                SizedBox(
+                  width: 30,
+                ),
+                buildTitlenSubtitleText(
+                    'Enter new pick up location', Colors.black, 18,
+                    FontWeight.w600, TextAlign.start, null),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 12,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 13, right: 15),
+            child: buildSearchField(),
+          ),
+          SizedBox(
+            height: size * 0.011,
+          ),
+        ],
+      ),
+    );
+  }
+
+  buildSearchField() {
+    return Row(
+      children: [
+        Icon(Icons.location_on),
+        SizedBox(width: 10.0),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(3.0),
+              child: TextFormField(
+                onChanged: (val) async {
+                  _getNewLocationAddress(val);
+                },
+                decoration: InputDecoration(
+                    hintText: pickUpController.text,
+                    fillColor: Colors.grey[200],
+                    filled: true,
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding:
+                    EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0)),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  _getNewLocationAddress(String addressName) async {
+    if (addressName.length == 1)
+      showToast(context, 'Fetching predictions', null);
+
+
+    if (addressName.length > 1) {
+      String url =
+          "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$addressName&key=$kMapKey&sessiontoken=1234567890&components=country:ng";
+
+      var response = await RequestAssistant.getRequest(url);
+
+      if (response == 'Failed') {
+        print('Lookup autocomplete failed');
+        return;
+      }
+
+      if (response["status"] == "OK") {
+        print('Autocomplete passed');
+
+        var predictions = response["predictions"];
+
+        var list = (predictions as List)
+            .map((json) => AddressPredictions.FromJson(json))
+            .toList();
+
+        setState(() {
+          predictedDestinationAddressList = list;
+        });
+      }
+    }
+  }
+}
+

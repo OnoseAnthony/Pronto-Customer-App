@@ -9,7 +9,6 @@ import 'package:fronto/Screens/Dashboard/orderRequestDescription.dart';
 import 'package:fronto/Services/mapServices.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/constants.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +27,6 @@ class _DirectionScreenState extends State<DirectionScreen> {
   LatLngBounds directionBounds;
   Set<Marker> mapMarkers = {};
   Set<Circle> mapMarkerCircles = {};
-  Position _currentUserPosition;
   bool _locationButton = false;
 
   static final CameraPosition _kGooglePlex = CameraPosition(
@@ -67,8 +65,6 @@ class _DirectionScreenState extends State<DirectionScreen> {
                 _locationButton = true;
                 kMapBottomPadding = size * 0.19;
               });
-
-              _getUserLocation();
             },
           ),
           Positioned(
@@ -117,22 +113,6 @@ class _DirectionScreenState extends State<DirectionScreen> {
     );
   }
 
-  _getUserLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    _currentUserPosition = position;
-
-    LatLng _userLatitudeLongitudePosition =
-        LatLng(_currentUserPosition.latitude, _currentUserPosition.longitude);
-
-    CameraPosition _cameraPosition =
-        CameraPosition(target: _userLatitudeLongitudePosition, zoom: 15);
-    _newGoogleMapController
-        .animateCamera(CameraUpdate.newCameraPosition(_cameraPosition));
-
-    await AssistantMethods.searchCoordinateAddress(
-        _currentUserPosition, context);
-  }
 
   _displayDirectionsOnMap() async {
     var pickUp = Provider.of<AppData>(context, listen: false).pickUpLocation;

@@ -18,7 +18,7 @@ class OrderSummary extends StatelessWidget {
       {this.itemDescription, this.itemDescriptionImagePath, this.receiverInfo});
 
   String _directionInfo;
-  var _chargeAmount;
+  int _chargeAmount;
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +30,11 @@ class OrderSummary extends StatelessWidget {
 
     _chargeAmount = Provider.of<AppData>(context).directionInfo != null
         ? AssistantMethods.calculateFare(
-            Provider.of<AppData>(context).directionInfo)
-        : "5000";
+            context, Provider.of<AppData>(context).directionInfo)
+        : 5000;
+
+    Provider.of<AppData>(context, listen: false)
+        .updateChargeAmount(_chargeAmount);
 
     return Scaffold(
       floatingActionButton: Container(
@@ -89,7 +92,7 @@ class OrderSummary extends StatelessWidget {
                 padding:
                     EdgeInsets.only(left: 20, right: 20, bottom: size * 0.05),
                 child: buildCustomListTile(
-                    buildContainerImage(''),
+                    buildContainerImage(null),
                     Flexible(
                       flex: 2,
                       child: Column(
@@ -140,7 +143,7 @@ class OrderSummary extends StatelessWidget {
                 child: Column(
                   children: [
                     buildCustomListTile(
-                        buildContainerImage(''),
+                        buildContainerImage(null),
                         Flexible(
                           flex: 2,
                           child: Column(

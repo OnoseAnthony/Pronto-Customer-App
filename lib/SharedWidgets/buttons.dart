@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fronto/constants.dart';
 
@@ -44,13 +46,13 @@ getIcon(IconData iconData, double size, Color color) {
   );
 }
 
-buildContainerImage(String imagePath) {
-  if (imagePath != '')
+buildContainerImage(File imagePath) {
+  if (imagePath != null)
     return Container(
       height: 50,
       width: 50,
       decoration: BoxDecoration(
-        image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover),
+        image: DecorationImage(image: FileImage(imagePath), fit: BoxFit.cover),
         borderRadius: BorderRadius.circular(100),
       ),
     );

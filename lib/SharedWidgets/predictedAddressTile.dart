@@ -5,6 +5,7 @@ import 'package:fronto/Screens/Dashboard/directions.dart';
 import 'package:fronto/Services/requestAssistant.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/customListTile.dart';
+import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/divider.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/constants.dart';
@@ -12,15 +13,19 @@ import 'package:provider/provider.dart';
 
 class PredictedAddressTile extends StatelessWidget {
   final AddressPredictions addressPredictions;
+  final String label;
 
-  PredictedAddressTile({Key key, this.addressPredictions}) : super(key: key);
+  PredictedAddressTile(
+      {Key key, @required this.addressPredictions, @required this.label})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return FlatButton(
       padding: EdgeInsets.all(0.0),
       onPressed: () {
-        getDestinationAddressDetails(addressPredictions.place_id, context);
+        getDestinationAddressDetails(
+            addressPredictions.place_id, context, label);
       },
       child: Container(
         padding: EdgeInsets.symmetric(
@@ -79,7 +84,15 @@ class PredictedAddressTile extends StatelessWidget {
     );
   }
 
-  getDestinationAddressDetails(String addressId, context) async {
+  getDestinationAddressDetails(String addressId, context, String label) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return NavigationLoader(context);
+      },
+    );
+
     print('Fetching your destinaiton details');
     String url =
         "https://maps.googleapis.com/maps/api/place/details/json?place_id=$addressId&key=$kMapKey";
@@ -90,7 +103,7 @@ class PredictedAddressTile extends StatelessWidget {
 
     if (response == 'Failed') return;
 
-    if (response["status"] == "OK") {
+    if (response["status"] == "OK" && label == 'destination') {
       Address address = Address(
         placeName: response["result"]["name"],
         placeId: addressId,
@@ -103,8 +116,27 @@ class PredictedAddressTile extends StatelessWidget {
 
       print('Destination address is ${address.placeName}');
 
+      Navigator.pop(context);
+
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => DirectionScreen()));
+    }
+
+    if (response["status"] == "OK" && label == 'pickUp') {
+      Address address = Address(
+        placeName: response["result"]["name"],
+        placeId: addressId,
+        latitude: response["result"]["geometry"]["location"]["lat"].toString(),
+        longitude: response["result"]["geometry"]["location"]["lng"].toString(),
+      );
+
+      Provider.of<AppData>(context, listen: false)
+          .updatePickupLocationAddress(address);
+
+      print('pickUp address is ${address.placeName}');
+
+      Navigator.pop(context);
+      Navigator.pop(context);
     }
   }
 }

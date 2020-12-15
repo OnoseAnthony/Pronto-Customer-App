@@ -5,6 +5,7 @@ import 'package:fronto/Models/address.dart';
 import 'package:fronto/Services/requestAssistant.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/customListTile.dart';
+import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/predictedAddressTile.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/constants.dart';
@@ -120,8 +121,10 @@ class _SearchScreenState extends State<SearchScreen> {
                           physics: NeverScrollableScrollPhysics(),
                           itemBuilder: (BuildContext context, int index) {
                             return PredictedAddressTile(
-                                addressPredictions:
-                                    predictedDestinationAddressList[index]);
+                              addressPredictions:
+                                  predictedDestinationAddressList[index],
+                              label: 'destination',
+                            );
                           },
                         )
                       : Container(),
@@ -160,7 +163,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 40),
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        showToast(context, 'Please enter package destination',
+                            Colors.red);
+                      },
                       child: buildSubmitButton('NEXT', 25.0),
                     ),
                   ),
@@ -188,8 +194,8 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  buildSearchField(
-      String hintText, IconData iconData, TextEditingController controller) {
+  buildSearchField(String hintText, IconData iconData,
+      TextEditingController controller, bool readOnly) {
     return Row(
       children: [
         Icon(iconData),
@@ -202,6 +208,7 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Padding(
               padding: EdgeInsets.all(3.0),
               child: TextFormField(
+                readOnly: readOnly,
                 onChanged: (val) {
                   _getDestinationAddress(val);
                 },
@@ -213,7 +220,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding:
-                        EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0)),
+                    EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0)),
               ),
             ),
           ),
@@ -254,7 +261,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Padding(
             padding: EdgeInsets.only(left: 13, right: 15),
             child: buildSearchField(
-                'Pickup location', Icons.location_on, pickUpController),
+                'Pickup location', Icons.location_on, pickUpController, true),
           ),
           SizedBox(
             height: 5,
@@ -262,7 +269,8 @@ class _SearchScreenState extends State<SearchScreen> {
           Padding(
             padding: EdgeInsets.only(left: 13, right: 15),
             child: buildSearchField(
-                'Enter destination', Icons.location_on, destinationController),
+                'Enter destination', Icons.location_on, destinationController,
+                false),
           ),
           SizedBox(
             height: size * 0.011,
@@ -296,6 +304,10 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   _getDestinationAddress(String addressName) async {
+    if (addressName.length == 1)
+      showToast(context, 'Fetching predictions', null);
+
+
     if (addressName.length > 1) {
       String url =
           "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$addressName&key=$kMapKey&sessiontoken=1234567890&components=country:ng";
@@ -321,5 +333,9 @@ class _SearchScreenState extends State<SearchScreen> {
         });
       }
     }
+
   }
 }
+
+
+

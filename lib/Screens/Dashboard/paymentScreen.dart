@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:fronto/Models/cards.dart';
+import 'package:fronto/Screens/Dashboard/homeScreen.dart';
 import 'package:fronto/Services/cardServices.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
+import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/SharedWidgets/textFormField.dart';
 import 'package:fronto/Utils/cardValidators.dart';
@@ -158,14 +160,24 @@ class _PaymentPageState extends State<PaymentPage> {
 
                               var reference = getReference();
 
-                              await CardAssistant.chargeCard(
+                              bool response = await CardAssistant.chargeCard(
                                   context,
                                   reference,
                                   widget.chargeAmount,
                                   'oanthony590@gmail.com',
-                                  getCardFromUI(_expDate, _cardNumber, _cvv),
-                                  loading,
-                                  () => setState(() => {}));
+                                  getCardFromUI(_expDate, _cardNumber, _cvv));
+
+                              if (response) {
+                                showToast(
+                                    context,
+                                    'Payment Successful. Processing Order...',
+                                    Colors.green);
+                                await handleOnSuccess(context);
+                              } else {
+                                showToast(
+                                    context, 'Payment Failed', Colors.red);
+                                handleOnError(context);
+                              }
 
                               setState(() {
                                 loading = false;
@@ -196,6 +208,9 @@ class _PaymentPageState extends State<PaymentPage> {
                               setState(() {
                                 loading = false;
                               });
+
+                              showToast(context, 'Card added successfully',
+                                  Colors.green);
                             }
                             break;
                         }
@@ -308,6 +323,8 @@ class _PaymentPageState extends State<PaymentPage> {
                         }
 
                         Navigator.pop(context);
+                        showToast(
+                            context, 'Card removed successfully', Colors.green);
                       },
                       child: Text(
                         'YES',
@@ -364,15 +381,25 @@ class _PaymentPageState extends State<PaymentPage> {
 
                   var reference = getReference();
 
-                  await CardAssistant.chargeCard(
-                      context,
-                      reference,
-                      widget.chargeAmount,
-                      'oanthony590@gmail.com',
-                      getCardFromSharedPreference(
-                          expMonth, expYear, cardNumber, cvv),
-                      loading,
-                      () => setState(() => {}));
+                  bool response = await CardAssistant.chargeCard(
+                    context,
+                    reference,
+                    widget.chargeAmount,
+                    'oanthony590@gmail.com',
+                    getCardFromSharedPreference(
+                        expMonth, expYear, cardNumber, cvv),
+                  );
+
+                  if (response) {
+                    showToast(
+                        context,
+                        'Payment Successful. Processing order...',
+                        Colors.green);
+                    await handleOnSuccess(context);
+                  } else {
+                    showToast(context, 'Payment Failed', Colors.red);
+                    handleOnError(context);
+                  }
 
                   setState(() {
                     loading = false;
@@ -494,6 +521,35 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         ),
       ),
+    );
+  }
+
+  handleOnSuccess(context) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return NavigationLoader(context);
+      },
+    );
+
+    //TODO: UPLOAD IMAGES TO GET URL
+    //TODO: SAVE ORDER DETAILS TO DATABASE
+
+    Navigator.pop(context);
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+        (route) => false);
+  }
+
+  handleOnError(context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return ErrorDialog(context);
+      },
     );
   }
 }

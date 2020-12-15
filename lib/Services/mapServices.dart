@@ -76,7 +76,7 @@ class AssistantMethods {
     return directions;
   }
 
-  static int calculateFare(Directions directions) {
+  static int calculateFare(context, Directions directions) {
     double fare;
     const exchangeRate = 500;
 
@@ -90,6 +90,9 @@ class AssistantMethods {
 
     //Can be converted to Naira here by multiplying exchage rate with calculated fare
     fare = fare * exchangeRate;
+
+    Provider.of<AppData>(context, listen: false)
+        .updateChargeAmount(fare.truncate());
 
     return fare.truncate();
   }

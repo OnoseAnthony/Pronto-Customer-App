@@ -12,34 +12,35 @@ class SplashScreen extends StatelessWidget {
       backgroundColor: kPrimaryColor,
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 40),
-        child: InkWell(
+        child: Center(
+          child: InkWell(
             onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => AddPhoneNumber()));
             },
-            child: Center(
-              child: Container(
-                height: 52,
-                margin: EdgeInsets.symmetric(
-                  horizontal: 0,
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 13),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25.0),
-                  color: kContainerIconColor,
-                ),
-                child: Center(
-                  child: Text(
-                    'NEXT',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: kPrimaryColor,
-                    ),
+            child: Container(
+              height: 52,
+              margin: EdgeInsets.symmetric(
+                horizontal: 0,
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 13),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25.0),
+                color: kContainerIconColor,
+              ),
+              child: Center(
+                child: Text(
+                  'NEXT',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: kPrimaryColor,
                   ),
                 ),
               ),
-            )),
+            ),
+          ),
+        ),
       ),
     );
   }

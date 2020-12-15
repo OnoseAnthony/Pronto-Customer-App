@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fronto/DataHandler/appData.dart';
+import 'package:fronto/Models/orders.dart';
 import 'package:fronto/Screens/Dashboard/orderRequestSummary.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/customListTile.dart';
+import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/SharedWidgets/textFormField.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class OrderScreen extends StatefulWidget {
@@ -18,13 +23,20 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  TextEditingController textController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController itemController = TextEditingController();
+  TextEditingController receiverPhoneController = TextEditingController();
+  TextEditingController receiverNameController = TextEditingController();
 
   String _hintText;
+  File _staticReceiverImage;
+  File _staticItemImage;
 
   @override
   void dispose() {
-    textController.dispose();
+    itemController.dispose();
+    receiverPhoneController.dispose();
+    receiverNameController.dispose();
     super.dispose();
   }
 
@@ -33,7 +45,7 @@ class _OrderScreenState extends State<OrderScreen> {
     _hintText = Provider.of<AppData>(context).destinationLocation != null
         ? Provider.of<AppData>(context).destinationLocation.placeName
         : "unknown location";
-    print('This is _hintText $_hintText');
+
     return Material(
       elevation: 10,
       color: Colors.white,
@@ -43,12 +55,17 @@ class _OrderScreenState extends State<OrderScreen> {
         padding: EdgeInsets.only(top: widget.size * 0.04, left: 40, right: 40),
         controller: widget.controller,
         children: [
-          buildTitlenSubtitleText('Where do you want your package delivered?',
-              Colors.black, 20, FontWeight.w600, TextAlign.start, null),
+          buildTitlenSubtitleText(
+              'Please add package description and receiver details',
+              Colors.black,
+              20,
+              FontWeight.w600,
+              TextAlign.start,
+              null),
           SizedBox(
             height: 20,
           ),
-          buildNonEditTextField(_hintText, () => Navigator.pop(context)),
+          buildNonEditTextField(_hintText, null),
           SizedBox(
             height: 20,
           ),
@@ -80,38 +97,67 @@ class _OrderScreenState extends State<OrderScreen> {
                   ],
                 ),
               ),
-              getIcon(Icons.edit, 20, Colors.black54),
+              Container(),
               5.0,
               true),
           SizedBox(
             height: 25,
           ),
-          _buildRow('Add an image of the item', null),
-          SizedBox(
-            height: 15,
+          Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildRow('Add an image of the item', 'itemImage'),
+                SizedBox(
+                  height: 15,
+                ),
+                buildTextField('Description', itemController),
+                SizedBox(
+                  height: 35,
+                ),
+                _buildRow('Image of receiver', 'receiverImage'),
+                SizedBox(
+                  height: 15,
+                ),
+                buildTextField('Name of receiver', receiverNameController),
+                SizedBox(
+                  height: 30,
+                ),
+                buildTextField(
+                    'Phone number of receiver', receiverPhoneController),
+              ],
+            ),
           ),
-          buildTextField('Description', textController),
-          SizedBox(
-            height: 35,
-          ),
-          _buildRow('Image of receiver', null),
-          SizedBox(
-            height: 15,
-          ),
-          buildTextField('Name of receiver', textController),
-          SizedBox(
-            height: 30,
-          ),
-          buildTextField('Phone number of receiver', textController),
           SizedBox(
             height: 50,
           ),
           InkWell(
             onTap: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => OrderSummary()));
+              if (_formKey.currentState.validate() &&
+                  _staticItemImage != null &&
+                  _staticReceiverImage != null) {
+                OrderData orderData = OrderData(
+                  receiverImage: _staticReceiverImage,
+                  itemImage: _staticItemImage,
+                  receiverInfo: receiverNameController.text,
+                  receiverPhone: receiverPhoneController.text,
+                  itemDescription: itemController.text,
+                );
+
+                Provider.of<AppData>(context, listen: false)
+                    .updateOrderImages(orderData);
+
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => OrderSummary()));
+              } else if (_staticItemImage == null)
+                showToast(context, 'Please upload a clear photo of the item',
+                    Colors.red);
+              else if (_staticReceiverImage == null)
+                showToast(context,
+                    'Please upload a clear photo of the receiver', Colors.red);
             },
-            child: buildSubmitButton('PROCEED', 25.0),
+            child: buildSubmitButton('SEND ITEM', 25.0),
           ),
           SizedBox(
             height: 20,
@@ -121,12 +167,28 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  _buildRow(String info, Function onTap) {
+  _buildRow(String info, String label) {
     return Row(
       children: [
         InkWell(
-          onTap: onTap,
-          child: buildContainerIcon(Icons.camera_alt),
+          onTap: () async {
+            var tempImage = await ImagePicker.pickImage(
+                source: ImageSource.gallery);
+            if (label == 'receiverImage') {
+              setState(() {
+                _staticReceiverImage = tempImage;
+              });
+            } else {
+              setState(() {
+                _staticItemImage = tempImage;
+              });
+            }
+          },
+          child: label == 'receiverImage' && _staticReceiverImage != null
+              ? buildContainerImage(_staticReceiverImage)
+              : label == 'itemImage' && _staticItemImage != null
+              ? buildContainerImage(_staticItemImage)
+              : buildContainerIcon(Icons.camera_alt),
         ),
         SizedBox(
           width: 20,
@@ -136,4 +198,6 @@ class _OrderScreenState extends State<OrderScreen> {
       ],
     );
   }
+
+
 }

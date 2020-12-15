@@ -5,14 +5,13 @@ import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:fronto/Utils/cardValidators.dart';
 
 class CardAssistant {
-  static Future<void> chargeCard(
-      BuildContext context,
-      String reference,
-      int price,
-      String email,
-      PaymentCard paymentCard,
-      bool loading,
-      Function function) async {
+  static Future<bool> chargeCard(
+    BuildContext context,
+    String reference,
+    int price,
+    String email,
+    PaymentCard paymentCard,
+  ) async {
     int amount = price * 100;
     var charge = Charge()
       ..amount = amount
@@ -20,15 +19,14 @@ class CardAssistant {
       ..reference = reference
       ..card = paymentCard;
 
-
     CheckoutResponse response = await PaystackPlugin.chargeCard(
       context,
       charge: charge,
     );
 
     if (response.status == true)
-      handleOnSuccess(loading, function);
-    else if (response.status == false) handleOnError(loading, function);
+      return true;
+    else if (response.status == false) return false;
   }
 }
 
@@ -67,17 +65,3 @@ handleBeforeValidate(Transaction transaction) {
   print(transaction.message);
 }
 
-handleOnSuccess(bool loading, Function function) {
-  loading = false;
-  function;
-  print("success");
-  // _showDialog();
-}
-
-handleOnError(bool loading, Function function) {
-  loading = false;
-  function;
-  print("error");
-
-  // _showErrorDialog();
-}
