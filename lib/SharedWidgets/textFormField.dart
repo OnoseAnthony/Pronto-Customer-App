@@ -1,12 +1,11 @@
-import 'package:country_list_pick/country_list_pick.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/Utils/cardInputFormatter.dart';
 import 'package:fronto/Utils/cardValidators.dart';
-import 'package:fronto/constants.dart';
 
-buildPhoneNumberTextField(String hintText, TextEditingController controller) {
+buildPhoneNumberTextField(
+    String hintText, TextEditingController controller, Widget prefixIcon) {
   return Container(
     child: TextFormField(
       keyboardType: TextInputType.number,
@@ -18,7 +17,7 @@ buildPhoneNumberTextField(String hintText, TextEditingController controller) {
       ],
       validator: (val) => val.isEmpty ? 'Field Cannot be empty' : null,
       decoration: InputDecoration(
-        prefixIcon: buildCountryDropDown1(),
+        prefixIcon: prefixIcon,
         isDense: true,
         hintText: hintText,
         hintStyle: TextStyle(
@@ -38,46 +37,7 @@ buildPhoneNumberTextField(String hintText, TextEditingController controller) {
   );
 }
 
-buildCountryDropDown1() {
-  return Padding(
-    padding: EdgeInsets.only(left: 10.0, right: 10.0),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CountryListPick(
-          appBar: AppBar(
-            backgroundColor: kPrimaryColor,
-            title: Text('Select Country'),
-          ),
 
-          // To disable option set to false
-          theme: CountryTheme(
-            isShowFlag: true,
-            isShowTitle: false,
-            isShowCode: true,
-            isDownIcon: true,
-            showEnglishName: true,
-          ),
-          // Set default value
-          initialSelection: '+234',
-          onChanged: (CountryCode code) {
-            print(code.name);
-            print(code.code);
-            print(code.dialCode);
-            print(code.flagUri);
-          },
-        ),
-        SizedBox(
-          width: 2,
-        ),
-        Container(
-          height: 25,
-          child: VerticalDivider(color: Colors.grey[600], thickness: 2),
-        ),
-      ],
-    ),
-  );
-}
 
 buildEmailTextField(String hintText, TextEditingController controller) {
   return Container(
@@ -243,8 +203,8 @@ buildExpiryNumberField(TextEditingController controller, String hintText,
 buildVerifyPhoneNumberField(TextEditingController controller,
     context) {
   return Container(
-    width: 68,
-    height: 50,
+    width: 35,
+    height: 35,
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(3),
@@ -265,7 +225,7 @@ buildVerifyPhoneNumberField(TextEditingController controller,
       ],
       validator: (val) => val.isEmpty ? 'Field Cannot be empty' : null,
       decoration: InputDecoration(
-        contentPadding: EdgeInsets.only(left: 15),
+        contentPadding: EdgeInsets.only(left: 15, bottom: 10),
         hintStyle: TextStyle(
             color: Colors.grey[400],
             fontSize: 12

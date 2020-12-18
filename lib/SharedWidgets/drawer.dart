@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fronto/Screens/Dashboard/DrawerScreens/trackingScreen.dart';
+import 'package:fronto/Screens/Dashboard/DrawerScreens/trackingListScreen.dart';
 import 'package:fronto/Screens/Dashboard/paymentScreen.dart';
+import 'package:fronto/Screens/wrapper.dart';
+import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/customListTile.dart';
+import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 
 buildDrawer(
@@ -74,7 +77,7 @@ buildDrawer(
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => TrackPackageScreen()));
+                              builder: (context) => TrackingListScreen()));
                     },
                     child: buildCustomListTile(
                         getIcon(Icons.location_on, 22, Colors.black),
@@ -104,6 +107,35 @@ buildDrawer(
                       null,
                       12.0,
                       false),
+                  SizedBox(
+                    height: 25.0,
+                  ),
+                  InkWell(
+                    onTap: () async {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => NavigationLoader(context),
+                      );
+                      bool isLoggedOut = await AuthService().signOut();
+                      if (isLoggedOut)
+                        Navigator.pushAndRemoveUntil(
+                            context, MaterialPageRoute(builder: (context) =>
+                            Wrapper()), (route) => false);
+                      else {
+                        Navigator.pop(context);
+                        print(
+                            'the user was\'nt logged out ************************************************wahala for user wey no log out o');
+                      }
+                    },
+                    child: buildCustomListTile(
+                        getIcon(Icons.login_outlined, 22, Colors.black),
+                        buildTitlenSubtitleText('Signout', Colors.black, 16,
+                            FontWeight.normal, TextAlign.start, null),
+                        null,
+                        12.0,
+                        false),
+                  ),
                 ],
               ),
             ),

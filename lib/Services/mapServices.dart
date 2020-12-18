@@ -11,6 +11,7 @@ class AssistantMethods {
   static Future<String> searchCoordinateAddress(
       Position position, context) async {
     String placeAddress = "";
+    String state = '';
 
     String url =
         "https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$kMapKey";
@@ -20,8 +21,18 @@ class AssistantMethods {
     if (_response != 'Failed') {
       placeAddress = _response["results"][0]["formatted_address"];
 
+      List components = _response["results"][0]["address_components"];
+      for (int i = 0; i < components.length; i++) {
+        if (components[i]["types"][0] == 'administrative_area_level_1') {
+          state = components[i]["long_name"];
+          print('state is $state');
+          break;
+        }
+      }
+
       Address userPickupAddress = Address(
         placeName: placeAddress,
+        stateName: state,
         latitude: position.latitude.toString(),
         longitude: position.longitude.toString(),
       );
@@ -32,6 +43,7 @@ class AssistantMethods {
       placeAddress = "We couldn\'t find your results at this time";
       Address userPickupAddress = Address(
         placeName: placeAddress,
+        stateName: state,
         latitude: position.latitude.toString(),
         longitude: position.longitude.toString(),
       );

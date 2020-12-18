@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fronto/Screens/Dashboard/homeScreen.dart';
+import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
+import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/SharedWidgets/textFormField.dart';
 
@@ -41,9 +43,31 @@ class _AddEmailAddressState extends State<AddEmailAddress> {
                   height: 100,
                 ),
                 InkWell(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()));
+                  onTap: () async {
+                    if (_formKey.currentState.validate()) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => NavigationLoader(context),
+                      );
+                      bool isUpdated = await AuthService()
+                          .updateUserEmailAddress(
+                              _controller.text.trim(), context);
+
+                      if (isUpdated) {
+                        Navigator.pop(context);
+
+                        showToast(
+                            context,
+                            'Email has been updating successfully!!',
+                            Colors.green);
+
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => HomeScreen()));
+                      }
+                    }
                   },
                   child: buildSubmitButton('NEXT', 25.0),
                 ),

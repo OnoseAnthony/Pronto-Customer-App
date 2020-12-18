@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fronto/Models/address.dart';
 import 'package:fronto/Models/directions.dart';
@@ -9,13 +10,19 @@ class AppData extends ChangeNotifier {
 
   Directions directionInfo;
 
-  User userInfo;
+  User firebaseUser;
 
-  OrderData orderDatum;
+  CustomUser userInfo;
+
+  orderRequest orderRequestInfo;
 
   Order orderDetails;
 
   int chargeAmount;
+
+  String paymentReference;
+
+  String paymentStatus;
 
   updatePickupLocationAddress(Address pickUpAddress) {
     pickUpLocation = pickUpAddress;
@@ -32,13 +39,18 @@ class AppData extends ChangeNotifier {
     notifyListeners();
   }
 
-  updateUserInfo(User user) {
+  updateFirebaseUser(User user) {
+    firebaseUser = user;
+    notifyListeners();
+  }
+
+  updateUserInfo(CustomUser user) {
     userInfo = user;
     notifyListeners();
   }
 
-  updateOrderImages(OrderData orderData) {
-    orderDatum = orderData;
+  updateOrderRequest(orderRequest orderRequest) {
+    orderRequestInfo = orderRequest;
     notifyListeners();
   }
 
@@ -49,5 +61,16 @@ class AppData extends ChangeNotifier {
 
   updateChargeAmount(int amount) {
     chargeAmount = amount;
+    notifyListeners();
+  }
+
+  updatePaymentReference(String reference) {
+    paymentReference = reference;
+    notifyListeners();
+  }
+
+  updatePaymentStatus(String status) {
+    paymentStatus = status;
+    notifyListeners();
   }
 }

@@ -30,7 +30,7 @@ class CardAssistant {
   }
 }
 
-String getReference() {
+String getPaymentReference() {
   String platform;
   if (Platform.isIOS) {
     platform = 'iOS';

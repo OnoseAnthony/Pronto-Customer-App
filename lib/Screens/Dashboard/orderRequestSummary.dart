@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fronto/DataHandler/appData.dart';
 import 'package:fronto/Screens/Dashboard/paymentScreen.dart';
@@ -10,14 +12,17 @@ import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class OrderSummary extends StatelessWidget {
-  String itemDescription;
-  String itemDescriptionImagePath;
-  String receiverInfo;
 
-  OrderSummary(
-      {this.itemDescription, this.itemDescriptionImagePath, this.receiverInfo});
 
   String _directionInfo;
+  String _destinationState;
+  String _pickUpState;
+  String _receiverName;
+  String _itemDescription;
+  String _destinationLocation;
+  String _pickUpLocation;
+  File _itemImage;
+  File _receiverImage;
   int _chargeAmount;
 
   @override
@@ -33,6 +38,40 @@ class OrderSummary extends StatelessWidget {
             context, Provider.of<AppData>(context).directionInfo)
         : 5000;
 
+    _destinationLocation =
+        Provider.of<AppData>(context).destinationLocation != null
+            ? Provider.of<AppData>(context).destinationLocation.placeName
+            : "unknown location";
+
+    _pickUpLocation = Provider.of<AppData>(context).pickUpLocation != null
+        ? Provider.of<AppData>(context).pickUpLocation.placeName
+        : "unknown location";
+
+    _destinationState =
+        Provider.of<AppData>(context).destinationLocation != null
+            ? Provider.of<AppData>(context).destinationLocation.stateName
+            : "unknown location";
+
+    _pickUpState = Provider.of<AppData>(context).pickUpLocation != null
+        ? Provider.of<AppData>(context).pickUpLocation.stateName
+        : "unknown location";
+
+    _receiverName = Provider.of<AppData>(context).orderRequestInfo != null
+        ? Provider.of<AppData>(context).orderRequestInfo.receiverInfo
+        : "unknown location";
+
+    _itemDescription = Provider.of<AppData>(context).orderRequestInfo != null
+        ? Provider.of<AppData>(context).orderRequestInfo.itemDescription
+        : "unknown location";
+
+    _itemImage = Provider.of<AppData>(context).orderRequestInfo != null
+        ? Provider.of<AppData>(context).orderRequestInfo.itemImage
+        : "unknown location";
+
+    _receiverImage = Provider.of<AppData>(context).orderRequestInfo != null
+        ? Provider.of<AppData>(context).orderRequestInfo.receiverImage
+        : "unknown location";
+
     Provider.of<AppData>(context, listen: false)
         .updateChargeAmount(_chargeAmount);
 
@@ -45,7 +84,8 @@ class OrderSummary extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => PaymentPage(
+                      builder: (context) =>
+                          PaymentPage(
                             chargeAmount: _chargeAmount,
                             type: 'pay',
                           )));
@@ -90,9 +130,9 @@ class OrderSummary extends StatelessWidget {
               elevation: 10,
               child: Padding(
                 padding:
-                    EdgeInsets.only(left: 20, right: 20, bottom: size * 0.05),
+                EdgeInsets.only(left: 20, right: 20, bottom: size * 0.05),
                 child: buildCustomListTile(
-                    buildContainerImage(null),
+                    buildContainerImage(_itemImage),
                     Flexible(
                       flex: 2,
                       child: Column(
@@ -102,13 +142,14 @@ class OrderSummary extends StatelessWidget {
                           SizedBox(
                             height: 35,
                           ),
-                          buildTitlenSubtitleText('Laptop', Colors.black, 16,
+                          buildTitlenSubtitleText(
+                              _itemDescription, Colors.black, 16,
                               FontWeight.normal, TextAlign.start, null),
                           SizedBox(
                             height: 8,
                           ),
                           buildTitlenSubtitleText(
-                              'Details of the laptop gotten from description',
+                              _pickUpLocation,
                               Colors.grey[500],
                               12,
                               FontWeight.normal,
@@ -139,11 +180,11 @@ class OrderSummary extends StatelessWidget {
               elevation: 8,
               child: Padding(
                 padding:
-                    EdgeInsets.only(left: 20, right: 20, bottom: size * 0.04),
+                EdgeInsets.only(left: 20, right: 20, bottom: size * 0.04),
                 child: Column(
                   children: [
                     buildCustomListTile(
-                        buildContainerImage(null),
+                        buildContainerImage(_receiverImage),
                         Flexible(
                           flex: 2,
                           child: Column(
@@ -154,25 +195,17 @@ class OrderSummary extends StatelessWidget {
                               SizedBox(
                                 height: 30,
                               ),
+
                               buildTitlenSubtitleText(
-                                  'Uloho Jerome',
-                                  Colors.black,
-                                  16,
-                                  FontWeight.normal,
-                                  TextAlign.start,
-                                  null),
+                                  _receiverName, Colors.black, 16,
+                                  FontWeight.normal, TextAlign.start, null),
                               SizedBox(
                                 height: 8,
                               ),
+
                               buildTitlenSubtitleText(
-                                  Provider.of<AppData>(context)
-                                              .destinationLocation !=
-                                          null
-                                      ? Provider.of<AppData>(context)
-                                          .destinationLocation
-                                          .placeName
-                                      : "unknown location",
-                                  Colors.grey,
+                                  _destinationLocation,
+                                  Colors.grey[500],
                                   12,
                                   FontWeight.normal,
                                   TextAlign.start,
@@ -191,10 +224,24 @@ class OrderSummary extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            buildTitlenSubtitleText('Warri', Colors.grey[500],
-                                16, FontWeight.w700, TextAlign.start, null),
-                            buildTitlenSubtitleText('Lagos', Colors.grey[500],
-                                16, FontWeight.w700, TextAlign.start, null),
+
+
+                            buildTitlenSubtitleText(
+                                _pickUpState,
+                                Colors.grey[500],
+                                16,
+                                FontWeight.w700,
+                                TextAlign.start,
+                                null),
+
+
+                            buildTitlenSubtitleText(
+                                _destinationState,
+                                Colors.grey[500],
+                                16,
+                                FontWeight.w700,
+                                TextAlign.start,
+                                null),
                           ],
                         ),
                         SizedBox(

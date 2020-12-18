@@ -1,8 +1,11 @@
+import 'package:country_list_pick/country_list_pick.dart';
 import 'package:flutter/material.dart';
-import 'package:fronto/Screens/onboarding/verifyPhoneNumber.dart';
+import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
+import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/SharedWidgets/textFormField.dart';
+import 'package:fronto/constants.dart';
 
 class AddPhoneNumber extends StatefulWidget {
   @override
@@ -11,6 +14,7 @@ class AddPhoneNumber extends StatefulWidget {
 
 class _AddPhoneNumberState extends State<AddPhoneNumber> {
   final _formKey = GlobalKey<FormState>();
+  var phoneDialCode = '+234';
   TextEditingController _controller = TextEditingController();
 
   @override
@@ -46,14 +50,25 @@ class _AddPhoneNumberState extends State<AddPhoneNumber> {
                 SizedBox(
                   height: 30,
                 ),
-                buildPhoneNumberTextField('Phone number', _controller),
+                buildPhoneNumberTextField(
+                    'Phone number', _controller, buildCountryDropDown()),
                 SizedBox(
                   height: 100,
                 ),
                 InkWell(
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => VerifyPhone()));
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => NavigationLoader(context));
+                    if (_formKey.currentState.validate()) {
+                      final phoneNumber =
+                          phoneDialCode.trim() + _controller.text.trim();
+                      print(
+                          ' Phone number is *********************************************************************************************************************** $phoneNumber');
+                      AuthService()
+                          .createUserWithPhoneAuth(phoneNumber, context);
+                    }
                   },
                   child: buildSubmitButton('NEXT', 25.0),
                 ),
@@ -61,6 +76,50 @@ class _AddPhoneNumberState extends State<AddPhoneNumber> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  buildCountryDropDown() {
+    return Padding(
+      padding: EdgeInsets.only(left: 10.0, right: 10.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CountryListPick(
+            appBar: AppBar(
+              backgroundColor: kPrimaryColor,
+              title: Text('Select Country'),
+            ),
+
+            // To disable option set to false
+            theme: CountryTheme(
+              isShowFlag: true,
+              isShowTitle: false,
+              isShowCode: true,
+              isDownIcon: true,
+              showEnglishName: true,
+            ),
+            // Set default value
+            initialSelection: '+234',
+            onChanged: (CountryCode code) {
+              setState(() {
+                phoneDialCode = code.dialCode;
+              });
+              print(code.name);
+              print(code.code);
+              print(code.dialCode);
+              print(code.flagUri);
+            },
+          ),
+          SizedBox(
+            width: 2,
+          ),
+          Container(
+            height: 25,
+            child: VerticalDivider(color: Colors.grey[600], thickness: 2),
+          ),
+        ],
       ),
     );
   }

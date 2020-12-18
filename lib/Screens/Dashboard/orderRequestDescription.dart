@@ -137,7 +137,18 @@ class _OrderScreenState extends State<OrderScreen> {
               if (_formKey.currentState.validate() &&
                   _staticItemImage != null &&
                   _staticReceiverImage != null) {
-                OrderData orderData = OrderData(
+                print(
+                    'receiver image from screen is **************************${_staticReceiverImage.toString()}');
+                print(
+                    'item image from screen is ******************************${_staticItemImage.toString()}');
+                print(
+                    'receiverName from screen controller is *****************${receiverNameController.text}');
+                print(
+                    'receiver phone from screen controller is **************************${receiverPhoneController.text}');
+                print(
+                    'item description from screen controller is ************************************${itemController.text}');
+
+                orderRequest orderData = orderRequest(
                   receiverImage: _staticReceiverImage,
                   itemImage: _staticItemImage,
                   receiverInfo: receiverNameController.text,
@@ -146,7 +157,18 @@ class _OrderScreenState extends State<OrderScreen> {
                 );
 
                 Provider.of<AppData>(context, listen: false)
-                    .updateOrderImages(orderData);
+                    .updateOrderRequest(orderData);
+
+                print(
+                    'ItemImage String is *****************************************************${Provider.of<AppData>(context, listen: false).orderRequestInfo.itemImage.toString()}');
+                print(
+                    'Receiver Image string is ********************************************${Provider.of<AppData>(context, listen: false).orderRequestInfo.receiverImage.toString()}');
+                print(
+                    'ItemDescription is ************************************************${Provider.of<AppData>(context, listen: false).orderRequestInfo.itemDescription.toString()}');
+                print(
+                    'Receiver Name is ******************************************************${Provider.of<AppData>(context, listen: false).orderRequestInfo.receiverInfo.toString()}');
+                print(
+                    ' Receiver phone is ****************************************************${Provider.of<AppData>(context, listen: false).orderRequestInfo.receiverPhone.toString()}');
 
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => OrderSummary()));

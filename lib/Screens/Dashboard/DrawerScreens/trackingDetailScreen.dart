@@ -4,7 +4,22 @@ import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/SharedWidgets/tripTracker.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
-class TrackPackageScreen extends StatelessWidget {
+class TrackPackageDetailScreen extends StatelessWidget {
+  String orderId;
+  String pickUpDate;
+  String dropOffDate;
+  String pickUpState;
+  String destinationState;
+  int index;
+
+  TrackPackageDetailScreen(
+      {@required this.orderId,
+      @required this.pickUpDate,
+      @required this.dropOffDate,
+      @required this.pickUpState,
+      @required this.destinationState,
+      @required this.index});
+
   @override
   Widget build(BuildContext context) {
     double size = MediaQuery.of(context).size.height;
@@ -17,7 +32,7 @@ class TrackPackageScreen extends StatelessWidget {
             child: ListView.builder(
               padding: EdgeInsets.only(top: size * 0.15),
               scrollDirection: Axis.vertical,
-              itemCount: 3,
+              itemCount: index,
               itemBuilder: (context, index) {
                 return buildPackageTrackerCard(size, context, index);
               },
@@ -36,7 +51,7 @@ class TrackPackageScreen extends StatelessWidget {
                   SizedBox(
                     width: 25,
                   ),
-                  buildTitlenSubtitleText('Track package', Colors.black, 18,
+                  buildTitlenSubtitleText('Package Details', Colors.black, 18,
                       FontWeight.w600, TextAlign.start, null),
                 ],
               ),
@@ -63,7 +78,7 @@ class TrackPackageScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildTitlenSubtitleText('Order123456', Colors.black38, 14,
+              buildTitlenSubtitleText(orderId, Colors.black38, 14,
                   FontWeight.w700, TextAlign.start, null),
               SizedBox(
                 height: 20,
@@ -71,9 +86,9 @@ class TrackPackageScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  buildTitlenSubtitleText('8 Dec. 20', Colors.black26, 13,
+                  buildTitlenSubtitleText(pickUpDate, Colors.black26, 13,
                       FontWeight.w700, TextAlign.start, null),
-                  buildTitlenSubtitleText('9 Dec. 20', Colors.black26, 13,
+                  buildTitlenSubtitleText(dropOffDate, Colors.black26, 13,
                       FontWeight.w700, TextAlign.start, null),
                 ],
               ),
@@ -83,9 +98,9 @@ class TrackPackageScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  buildTitlenSubtitleText('Warri', Colors.black54, 16,
+                  buildTitlenSubtitleText(pickUpState, Colors.black54, 16,
                       FontWeight.w700, TextAlign.start, null),
-                  buildTitlenSubtitleText('Lagos', Colors.black54, 16,
+                  buildTitlenSubtitleText(destinationState, Colors.black54, 16,
                       FontWeight.w700, TextAlign.start, null),
                 ],
               ),
@@ -98,7 +113,7 @@ class TrackPackageScreen extends StatelessWidget {
               ),
               Center(
                 child: buildTitlenSubtitleText(
-                    'Heading to the city of lagos',
+                    'Heading to the city of $destinationState',
                     Colors.black26,
                     13,
                     FontWeight.w700,

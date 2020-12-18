@@ -2,9 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
+import 'package:fronto/DataHandler/appData.dart';
 import 'package:fronto/Models/cards.dart';
-import 'package:fronto/Screens/Dashboard/homeScreen.dart';
 import 'package:fronto/Services/cardServices.dart';
+import 'package:fronto/Services/firebase/firestore.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/text.dart';
@@ -12,13 +13,17 @@ import 'package:fronto/SharedWidgets/textFormField.dart';
 import 'package:fronto/Utils/cardValidators.dart';
 import 'package:fronto/constants.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PaymentPage extends StatefulWidget {
   int chargeAmount;
   String type;
 
-  PaymentPage({@required this.chargeAmount, @required this.type});
+  PaymentPage({
+    @required this.chargeAmount,
+    @required this.type,
+  });
 
   @override
   _PaymentPageState createState() => _PaymentPageState();
@@ -158,7 +163,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                 saveCardDetails();
                               }
 
-                              var reference = getReference();
+                              var reference = getPaymentReference();
 
                               bool response = await CardAssistant.chargeCard(
                                   context,
@@ -168,6 +173,10 @@ class _PaymentPageState extends State<PaymentPage> {
                                   getCardFromUI(_expDate, _cardNumber, _cvv));
 
                               if (response) {
+                                Provider.of<AppData>(context, listen: false)
+                                    .updatePaymentReference(reference);
+                                Provider.of<AppData>(context, listen: false)
+                                    .updatePaymentStatus('Successful');
                                 showToast(
                                     context,
                                     'Payment Successful. Processing Order...',
@@ -323,8 +332,11 @@ class _PaymentPageState extends State<PaymentPage> {
                         }
 
                         Navigator.pop(context);
-                        showToast(
-                            context, 'Card removed successfully', Colors.green);
+                        widget.type != 'pay'
+                            ? showToast(context, 'Card removed successfully',
+                                Colors.green)
+                            : showToast(context, 'Card Saved successfully',
+                                Colors.green);
                       },
                       child: Text(
                         'YES',
@@ -379,7 +391,7 @@ class _PaymentPageState extends State<PaymentPage> {
                     loading = true;
                   });
 
-                  var reference = getReference();
+                  var reference = getPaymentReference();
 
                   bool response = await CardAssistant.chargeCard(
                     context,
@@ -391,6 +403,10 @@ class _PaymentPageState extends State<PaymentPage> {
                   );
 
                   if (response) {
+                    Provider.of<AppData>(context, listen: false)
+                        .updatePaymentReference(reference);
+                    Provider.of<AppData>(context, listen: false)
+                        .updatePaymentStatus('Successful');
                     showToast(
                         context,
                         'Payment Successful. Processing order...',
@@ -533,14 +549,25 @@ class _PaymentPageState extends State<PaymentPage> {
       },
     );
 
-    //TODO: UPLOAD IMAGES TO GET URL
-    //TODO: SAVE ORDER DETAILS TO DATABASE
+    bool isSaved = await DatabaseService(firebaseUser: Provider
+        .of<AppData>(context, listen: false)
+        .firebaseUser, context: context).saveOrderRequest();
 
-    Navigator.pop(context);
-    Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-        (route) => false);
+    if (isSaved) {
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => completeDialog(context),
+      );
+    } else {
+      Navigator.pop(context);
+      showToast(context,
+          'we couldn\'t saved your order at this time. omo you\'ll try again be that',
+          Colors.red);
+      print(
+          'we couldn\'t saved your order at this time. omo you\'ll try again be that');
+    }
   }
 
   handleOnError(context) {

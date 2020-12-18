@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:fronto/Screens/Dashboard/homeScreen.dart';
+import 'package:fronto/Screens/wrapper.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 
@@ -10,7 +10,7 @@ class LoaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SpinKitWanderingCubes(
       color: Colors.white,
-      size: 50.0,
+      size: 30.0,
     );
   }
 }
@@ -27,11 +27,16 @@ Dialog NavigationLoader(BuildContext context) {
       height: 80.0,
       child: Padding(
         padding:
-            const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 20, right: 20),
+            const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 40, right: 20),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             LoaderWidget(),
+            SizedBox(
+              width: 30,
+            ),
+            buildTitlenSubtitleText('please wait a moment...', Colors.white, 14,
+                FontWeight.bold, TextAlign.center, null),
           ],
         ),
       ),
@@ -94,10 +99,71 @@ Dialog ErrorDialog(context) {
                     onPressed: () {
                       Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => HomeScreen()),
-                          (route) => false);
+                          MaterialPageRoute(builder: (context) => Wrapper()),
+                              (route) => false);
                     },
                     child: Text('NO')),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+
+Dialog completeDialog(context) {
+  return Dialog(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
+    child: Container(
+      height: 250.0,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
+      child: Padding(
+        padding:
+        const EdgeInsets.only(top: 8.0, bottom: 5, left: 20, right: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.check,
+              color: Colors.green,
+              size: 60,
+            ),
+            SizedBox(height: 15),
+            buildTitlenSubtitleText(
+                'Order request has been successfully processed. An agent will contact you soon',
+                Colors.black,
+                12,
+                FontWeight.w600,
+                TextAlign.start,
+                TextOverflow.visible),
+            SizedBox(
+              height: 10,
+            ),
+            buildTitlenSubtitleText(
+                'Proceed to dashboard?', Colors.black, 12, FontWeight.w600,
+                TextAlign.start, null),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FlatButton(
+                    textColor: Colors.white,
+                    color: Colors.blue,
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => Wrapper()),
+                              (route) => false);
+                    },
+                    child: Text('YES')),
               ],
             ),
           ],
@@ -136,14 +202,4 @@ showToast(context, String msg, Color color) {
     toastDuration: Duration(seconds: 4),
   );
 
-  // fToast.showToast(
-  //     child: toast,
-  //     toastDuration: Duration(seconds: 5),
-  //     positionedToastBuilder: (context, child) {
-  //       return Positioned(
-  //         child: child,
-  //         top: 40,
-  //         left: MediaQuery.of(context).size.width * 0.20,
-  //       );
-  //     });
 }

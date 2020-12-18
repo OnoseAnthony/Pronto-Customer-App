@@ -85,6 +85,8 @@ class PredictedAddressTile extends StatelessWidget {
   }
 
   getDestinationAddressDetails(String addressId, context, String label) async {
+    String state = '';
+
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -104,9 +106,18 @@ class PredictedAddressTile extends StatelessWidget {
     if (response == 'Failed') return;
 
     if (response["status"] == "OK" && label == 'destination') {
+      List components = response["result"]["address_components"];
+      for (int i = 0; i < components.length; i++) {
+        if (components[i]["types"][0] == 'administrative_area_level_1') {
+          state = components[i]["long_name"];
+          break;
+        }
+      }
+
       Address address = Address(
         placeName: response["result"]["name"],
         placeId: addressId,
+        stateName: state,
         latitude: response["result"]["geometry"]["location"]["lat"].toString(),
         longitude: response["result"]["geometry"]["location"]["lng"].toString(),
       );
@@ -123,12 +134,23 @@ class PredictedAddressTile extends StatelessWidget {
     }
 
     if (response["status"] == "OK" && label == 'pickUp') {
+      List components = response["result"]["address_components"];
+      for (int i = 0; i < components.length; i++) {
+        if (components[i]["types"][0] == 'administrative_area_level_1') {
+          state = components[i]["long_name"];
+          break;
+        }
+      }
+
+
       Address address = Address(
         placeName: response["result"]["name"],
         placeId: addressId,
+        stateName: state,
         latitude: response["result"]["geometry"]["location"]["lat"].toString(),
         longitude: response["result"]["geometry"]["location"]["lng"].toString(),
       );
+
 
       Provider.of<AppData>(context, listen: false)
           .updatePickupLocationAddress(address);

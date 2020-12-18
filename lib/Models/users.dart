@@ -1,26 +1,26 @@
-class User {
+class CustomUser {
   final String uid;
-
-  User({this.uid});
-}
-
-class UserData {
-  final String uid;
-  final String role;
+  final bool isDriver;
   final String fName;
   final String lName;
-  final String userName;
-  final String phoneNo;
-  final String emailAddress;
   final String photoUrl;
 
-  UserData(
-      {this.uid,
-      this.role,
-      this.fName,
-      this.lName,
-      this.userName,
-      this.phoneNo,
-      this.emailAddress,
-      this.photoUrl});
+  CustomUser({this.uid, this.isDriver, this.fName, this.lName, this.photoUrl});
+
+  CustomUser.fromMap(Map map)
+      : this.uid = map['uid'],
+        this.isDriver = map['isDriver'],
+        this.fName = map['fName'],
+        this.lName = map['lName'],
+        this.photoUrl = map['photoUrl'];
+
+  Map toMap() {
+    return {
+      'uid': this.uid,
+      'isDriver': this.isDriver,
+      'fName': this.fName,
+      'lName': this.lName,
+      'photoUrl': this.photoUrl,
+    };
+  }
 }

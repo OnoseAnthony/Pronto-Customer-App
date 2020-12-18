@@ -2,6 +2,7 @@ class Address {
   String placeFormmatedAddress;
   String placeName;
   String placeId;
+  String stateName;
   String latitude;
   String longitude;
 
@@ -9,6 +10,7 @@ class Address {
       {this.placeFormmatedAddress,
       this.placeName,
       this.placeId,
+      this.stateName,
       this.latitude,
       this.longitude});
 }
