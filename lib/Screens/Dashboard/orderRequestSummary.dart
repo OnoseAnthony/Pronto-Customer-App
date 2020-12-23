@@ -253,7 +253,12 @@ class OrderSummary extends StatelessWidget {
                     SizedBox(
                       height: 30,
                     ),
-                    buildSubmitButton('EDIT INFORMATION', 5.0)
+                    InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: buildSubmitButton('EDIT INFORMATION', 5.0),
+                    ),
                   ],
                 ),
               ),

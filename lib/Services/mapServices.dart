@@ -25,7 +25,6 @@ class AssistantMethods {
       for (int i = 0; i < components.length; i++) {
         if (components[i]["types"][0] == 'administrative_area_level_1') {
           state = components[i]["long_name"];
-          print('state is $state');
           break;
         }
       }
@@ -62,7 +61,6 @@ class AssistantMethods {
 
     var _response = await RequestAssistant.getRequest(url);
 
-    print('This is the response i got from get directions Api $_response');
 
     if (_response == 'Failed') return null;
 
@@ -74,16 +72,6 @@ class AssistantMethods {
       encodedPoints: _response["routes"][0]["overview_polyline"]["points"],
     );
 
-    print(
-        'This is the api call response for distance value : ${_response["routes"][0]["legs"][0]["distance"]["value"]}');
-    print(
-        'This is the api call response for distance text : ${_response["routes"][0]["legs"][0]["distance"]["text"]}');
-    print(
-        'This is the api call response for duration text : ${_response["routes"][0]["legs"][0]["duration"]["text"]}');
-    print(
-        'This is the api call response for duration value : ${_response["routes"][0]["legs"][0]["duration"]["value"]}');
-    print(
-        'This is the api call response for encoded point : ${_response["routes"][0]["overview_polyline"]["points"]}');
 
     return directions;
   }

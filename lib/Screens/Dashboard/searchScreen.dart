@@ -26,7 +26,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     pickUpController.dispose();
     destinationController.dispose();
     super.dispose();
@@ -39,9 +38,6 @@ class _SearchScreenState extends State<SearchScreen> {
         ? Provider.of<AppData>(context).pickUpLocation.placeName
         : "unknown location";
 
-    // destinationController.text = Provider.of<AppData>(context).destinationLocation != null
-    //     ? Provider.of<AppData>(context).destinationLocation.placeName
-    //     : "";
     return Scaffold(
       body: Stack(
         children: [
@@ -183,12 +179,6 @@ class _SearchScreenState extends State<SearchScreen> {
             top: 0,
             child: _searchScreen(size),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _pickLocationFromMapUI(),
-          ),
         ],
       ),
     );
@@ -280,28 +270,6 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  _pickLocationFromMapUI() {
-    return Material(
-      color: Colors.grey[300],
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.place_sharp,
-              color: Colors.black54,
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            buildTitlenSubtitleText('Choose on map', Colors.black54, 15,
-                FontWeight.normal, TextAlign.center, null),
-          ],
-        ),
-      ),
-    );
-  }
 
   _getDestinationAddress(String addressName) async {
     if (addressName.length == 1)
@@ -315,13 +283,10 @@ class _SearchScreenState extends State<SearchScreen> {
       var response = await RequestAssistant.getRequest(url);
 
       if (response == 'Failed') {
-        print('Lookup autocomplete failed');
         return;
       }
 
       if (response["status"] == "OK") {
-        print('Autocomplete passed');
-
         var predictions = response["predictions"];
 
         var list = (predictions as List)

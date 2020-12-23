@@ -105,17 +105,20 @@ class DatabaseService {
     Map pickUpLocationMap = {
       'latitude': pickUpLocation.latitude,
       'longitude': pickUpLocation.longitude,
+      'placeName': pickUpLocation.placeName,
       'stateName': pickUpLocation.stateName
     };
 
     Map destinationLocationMap = {
       'latitude': destinationLocation.latitude,
       'longitude': destinationLocation.longitude,
+      'placeName': destinationLocation.placeName,
       'stateName': destinationLocation.stateName
     };
 
     String receiverImageUrl =
     await getAndUploadOrderImages(context, 'receiverImage');
+
     String itemImageUrl = await getAndUploadOrderImages(context, 'itemImage');
 
     try {
@@ -125,6 +128,7 @@ class DatabaseService {
         "orderID": getOrderID(),
         "paymentReferenceID": paymentReference.trim(),
         "date": getCreationDate(),
+        "timeStamp": DateTime.now().toString(),
         "receiverInfo": orderRequest.receiverInfo.trim(),
         "receiverPhone": orderRequest.receiverPhone.trim(),
         "itemDescription": orderRequest.itemDescription.trim(),
@@ -136,14 +140,16 @@ class DatabaseService {
         "trackState": 1,
         "pickUpAddress": pickUpLocationMap,
         "destinationAddress": destinationLocationMap,
+        "driverID": '',
+        "driverPhone": '',
+        "deliveryTimeStamp": '',
+        "deliveryDate": '',
       });
 
       print(
           'We\'re in the try block **********************************************************************************************************************************************************should work');
       return Future.value(true);
     } catch (e) {
-      print(
-          print(e.toString());
           return Future.value(false);
     }
   }
@@ -157,6 +163,7 @@ class DatabaseService {
         orderID: doc.data()['orderID'],
         paymentReferenceID: doc.data()['paymentReferenceID'],
         date: doc.data()['date'],
+        timeStamp: doc.data()['timeStamp'],
         receiverInfo: doc.data()['receiverInfo'],
         receiverPhone: doc.data()['receiverPhone'],
         itemDescription: doc.data()['receiverInfo'],
@@ -168,6 +175,7 @@ class DatabaseService {
         trackState: doc.data()['trackState'],
         pickUpAddress: doc.data()['pickUpAddress'],
         destinationAddress: doc.data()['destinationAddress'],
+        deliveryDate: doc.data()['deliveryDate'],
       );
     }).toList();
   }

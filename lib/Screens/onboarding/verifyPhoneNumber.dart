@@ -68,8 +68,8 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                         FontWeight.normal,
                         TextAlign.start,
                         null),
-                    buildTitlenSubtitleText('+234 9030846221', Colors.black, 15,
-                        FontWeight.bold, TextAlign.start, null),
+                    buildTitlenSubtitleText(widget.phoneNumber, Colors.black,
+                        15, FontWeight.bold, TextAlign.start, null),
                   ],
                 ),
                 SizedBox(
@@ -120,7 +120,7 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                           _controller3.text.trim() +
                           _controller4.text.trim() +
                           _controller5.text.trim();
-                      print(codeString);
+
                       AuthCredential authCredential =
                           PhoneAuthProvider.credential(
                               verificationId: widget.verificationId,
@@ -136,9 +136,6 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                                       firebaseUser: user, context: context)
                                   .checkUser() !=
                               true) {
-                        print(
-                            'New user *************************************************************************************** found');
-
                         //New user so we create an instance
 
                         //create an instance of the database service to create user profile and set isDriver to false for the customer
@@ -150,7 +147,6 @@ class _VerifyPhoneState extends State<VerifyPhone> {
 
                         await DatabaseService(firebaseUser: user)
                             .updateUserProfileData(false, 'New', 'User', '');
-                        print(user.uid);
 
                         //provide the user info to the provider
                         Provider.of<AppData>(context, listen: false)
@@ -166,15 +162,10 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                                       firebaseUser: user, context: context)
                                   .checkUser() ==
                               true) {
-                        print(
-                            'Returning user *************************************************************************************** found');
-
                         //Returning user so we check if the user is a driver: NB for this app the user must be a customer so isDriver must be false
                         if (await DatabaseService(
                                 firebaseUser: user, context: context)
                             .checkUserIsDriver()) {
-                          print(
-                              'Returning user *************************************************************************************** found ***********************************and is a driver.. Logging out and sending back to the login page');
 
                           Navigator.pop(context);
                           Navigator.pop(context);
@@ -186,8 +177,6 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                               Colors.red);
                           await AuthService().signOut();
                         } else {
-                          print(
-                              'Returning user *************************************************************************************** found ***********************************and is a customer.. Logging in and sending  to the home page');
 
                           //returning user that's not a driver, we show toast and then navigate to home screen
                           showToast(

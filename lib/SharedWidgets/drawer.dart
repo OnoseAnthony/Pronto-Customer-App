@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fronto/Screens/Dashboard/DrawerScreens/emptyScreen.dart';
 import 'package:fronto/Screens/Dashboard/DrawerScreens/trackingListScreen.dart';
 import 'package:fronto/Screens/Dashboard/paymentScreen.dart';
 import 'package:fronto/Screens/wrapper.dart';
@@ -17,13 +18,13 @@ buildDrawer(
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      buildTitlenSubtitleText(
-          'Anthony', Colors.black, 18, FontWeight.bold, TextAlign.center, null),
+      buildTitlenSubtitleText(AuthService().getCurrentUser().phoneNumber,
+          Colors.black, 18, FontWeight.bold, TextAlign.center, null),
       SizedBox(
         height: 3,
       ),
-      buildTitlenSubtitleText('View profile', Colors.grey, 13,
-          FontWeight.normal, TextAlign.center, null),
+      buildTitlenSubtitleText(AuthService().getCurrentUser().email, Colors.grey,
+          13, FontWeight.normal, TextAlign.center, null),
     ],
   );
   return Container(
@@ -90,23 +91,47 @@ buildDrawer(
                   SizedBox(
                     height: 25.0,
                   ),
-                  buildCustomListTile(
-                      getIcon(Icons.live_help_rounded, 22, Colors.black),
-                      buildTitlenSubtitleText('Support', Colors.black, 16,
-                          FontWeight.normal, TextAlign.start, null),
-                      null,
-                      12.0,
-                      false),
+
+
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  EmptyScreen(screenName: 'support',)));
+                    },
+                    child: buildCustomListTile(
+                        getIcon(Icons.live_help_rounded, 22, Colors.black),
+                        buildTitlenSubtitleText('Support', Colors.black, 16,
+                            FontWeight.normal, TextAlign.start, null),
+                        null,
+                        12.0,
+                        false),
+                  ),
                   SizedBox(
                     height: 25.0,
                   ),
-                  buildCustomListTile(
-                      getIcon(Icons.info, 22, Colors.black),
-                      buildTitlenSubtitleText('About', Colors.black, 16,
-                          FontWeight.normal, TextAlign.start, null),
-                      null,
-                      12.0,
-                      false),
+
+
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  EmptyScreen(screenName: 'about',)));
+                    },
+                    child: buildCustomListTile(
+                        getIcon(Icons.info, 22, Colors.black),
+                        buildTitlenSubtitleText('About', Colors.black, 16,
+                            FontWeight.normal, TextAlign.start, null),
+                        null,
+                        12.0,
+                        false),
+                  ),
                   SizedBox(
                     height: 25.0,
                   ),
@@ -124,8 +149,6 @@ buildDrawer(
                             Wrapper()), (route) => false);
                       else {
                         Navigator.pop(context);
-                        print(
-                            'the user was\'nt logged out ************************************************wahala for user wey no log out o');
                       }
                     },
                     child: buildCustomListTile(

@@ -7,6 +7,7 @@ class Order {
   String orderID;
   String paymentReferenceID;
   String date;
+  String timeStamp;
   String receiverInfo;
   String receiverPhone;
   String itemDescription;
@@ -18,6 +19,10 @@ class Order {
   int trackState;
   Map pickUpAddress;
   Map destinationAddress;
+  String driverID;
+  String driverPhone;
+  String deliveryTimeStamp;
+  String deliveryDate;
 
   Order(
       {this.userID,
@@ -25,6 +30,7 @@ class Order {
       this.orderID,
       this.paymentReferenceID,
       this.date,
+      this.timeStamp,
       this.receiverInfo,
       this.receiverPhone,
       this.itemDescription,
@@ -35,25 +41,11 @@ class Order {
       this.orderStatus,
       this.trackState,
       this.pickUpAddress,
-      this.destinationAddress});
-
-  Order.fromMap(Map map)
-      : this.userID = map['userID'],
-        this.userPhone = map['userPhone'],
-        this.orderID = map['orderID'],
-        this.paymentReferenceID = map['paymentReferenceID'],
-        this.date = map['date'],
-        this.receiverInfo = map['receiverInfo'],
-        this.receiverPhone = map['receiverPhone'],
-        this.itemDescription = map['itemDescription'],
-        this.receiverImageUrl = map['receiverImageUrl'],
-        this.itemUrl = map['itemUrl'],
-        this.paymentStatus = map['paymentStatus'],
-        this.chargeAmount = map['chargeAmount'],
-        this.orderStatus = map['orderStatus'],
-        this.trackState = map['trackState'],
-        this.pickUpAddress = map['pickUpAddress'],
-        this.destinationAddress = map['destinationAddress'];
+      this.destinationAddress,
+      this.driverID,
+      this.driverPhone,
+      this.deliveryTimeStamp,
+      this.deliveryDate});
 }
 
 class orderRequest {

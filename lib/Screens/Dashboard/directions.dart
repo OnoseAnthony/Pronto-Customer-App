@@ -124,10 +124,6 @@ class _DirectionScreenState extends State<DirectionScreen> {
     var destinationLatLng = LatLng(double.parse(destination.latitude),
         double.parse(destination.longitude));
 
-    print('Setting destination on Maps. Please wait!!!!!!!!!!!!!');
-    print('Setting destination on Maps. Please wait!!!!!!!!!!!!!');
-    print('Setting destination on Maps. Please wait!!!!!!!!!!!!!');
-    print('Setting destination on Maps. Please wait!!!!!!!!!!!!!');
 
     Directions directionInfo =
         await AssistantMethods.getDirections(pickUpLatLng, destinationLatLng);
@@ -136,16 +132,6 @@ class _DirectionScreenState extends State<DirectionScreen> {
       tripInfo = directionInfo;
     });
 
-    print('Setting destination on Maps. Done!!!!! Please check');
-    print('Setting destination on Maps. Done!!!!! Please check');
-    print('Setting destination on Maps. Done!!!!! Please check');
-    print('Setting destination on Maps. Done!!!!! Please check');
-
-    print('This is the map direction details:: ${directionInfo.encodedPoints}');
-    print('This is the map direction details:: ${directionInfo.durationText}');
-    print('This is the map direction details:: ${directionInfo.durationValue}');
-    print('This is the map direction details:: ${directionInfo.distanceText}');
-    print('This is the map direction details:: ${directionInfo.distanceValue}');
 
     Provider.of<AppData>(context, listen: false)
         .updateDirectionsInfo(directionInfo);
@@ -235,7 +221,7 @@ class _DirectionScreenState extends State<DirectionScreen> {
       radius: 10,
       strokeWidth: 3,
       strokeColor: Colors.white,
-      circleId: CircleId("pickUpId"),
+      circleId: CircleId("destinationId"),
     );
 
     setState(() {

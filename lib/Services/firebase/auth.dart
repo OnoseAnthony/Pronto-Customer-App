@@ -33,8 +33,6 @@ class AuthService {
               await DatabaseService(firebaseUser: user, context: context)
                       .checkUser() !=
                   true) {
-            print(
-                'New user *************************************************************************************** found');
 
             //New user so we create an instance
 
@@ -45,7 +43,6 @@ class AuthService {
 
             await DatabaseService(firebaseUser: user, context: context)
                 .updateUserProfileData(false, 'New', 'User', '');
-            print(user.uid);
 
             //provide the user info to the provider
             Provider.of<AppData>(context, listen: false)
@@ -58,26 +55,19 @@ class AuthService {
               await DatabaseService(firebaseUser: user, context: context)
                       .checkUser() ==
                   true) {
-            print(
-                'Returning user *************************************************************************************** found');
 
             //Returning user so we check if the user is a driver: NB for this app the user must be a customer so isDriver must be false
             if (await DatabaseService(firebaseUser: user, context: context)
                 .checkUserIsDriver()) {
-              print(
-                  'Returning user *************************************************************************************** found ***********************************and is a driver.. Logging out and sending back to the login page');
 
               Navigator.pop(context);
 
               //Since isDriver is true we show a dialog a toast to the user and then logout the user
               showToast(
-                  context,
-                  'Access Denied!!! Only customers can access this app',
+                  context, 'Access Denied!!! Only customers allowed',
                   Colors.red);
               await signOut();
             } else {
-              print(
-                  'Returning user *************************************************************************************** found ***********************************and is a customer.. Logging in and sending  to the home page');
 
               //returning user that's not a driver, we show toast and then navigate to home screen
               showToast(context, 'Authentication Successful. Please wait',
@@ -94,7 +84,9 @@ class AuthService {
           }
         },
         verificationFailed: (FirebaseAuthException exception) {
-          print(exception);
+          Navigator.pop(context);
+          showToast(context, 'Authentication Failed. Try Later',
+              Colors.green);
         },
         codeSent: (String verificationID, [int forceResendingToken]) {
           //NAVIGATE TO THE SCREEN WHERE THEY CAN ENTER THE CODE SENT
@@ -116,17 +108,14 @@ class AuthService {
     if (user != null)
       try {
         await user.updateEmail(emailAddress);
-        print('i got to the update user email address');
         Provider.of<AppData>(context, listen: false).updateFirebaseUser(user);
         return Future.value(true);
       } catch (e) {
-        print(e.toString());
         return Future.value(false);
       }
   }
 
   User getCurrentUser() {
-    print(auth.currentUser);
     return auth.currentUser;
   }
 
@@ -137,7 +126,6 @@ class AuthService {
         await auth.signOut();
         return Future.value(true);
       } catch (e) {
-        print(e.toString());
         return Future.value(false);
       }
   }

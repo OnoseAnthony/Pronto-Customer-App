@@ -95,13 +95,11 @@ class PredictedAddressTile extends StatelessWidget {
       },
     );
 
-    print('Fetching your destinaiton details');
     String url =
         "https://maps.googleapis.com/maps/api/place/details/json?place_id=$addressId&key=$kMapKey";
 
     var response = await RequestAssistant.getRequest(url);
 
-    print('Fetching and setting your destination details');
 
     if (response == 'Failed') return;
 
@@ -125,7 +123,6 @@ class PredictedAddressTile extends StatelessWidget {
       Provider.of<AppData>(context, listen: false)
           .updateDestinationpLocationAddress(address);
 
-      print('Destination address is ${address.placeName}');
 
       Navigator.pop(context);
 
@@ -155,7 +152,6 @@ class PredictedAddressTile extends StatelessWidget {
       Provider.of<AppData>(context, listen: false)
           .updatePickupLocationAddress(address);
 
-      print('pickUp address is ${address.placeName}');
 
       Navigator.pop(context);
       Navigator.pop(context);

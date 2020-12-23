@@ -562,11 +562,8 @@ class _PaymentPageState extends State<PaymentPage> {
       );
     } else {
       Navigator.pop(context);
-      showToast(context,
-          'we couldn\'t saved your order at this time. omo you\'ll try again be that',
-          Colors.red);
-      print(
-          'we couldn\'t saved your order at this time. omo you\'ll try again be that');
+      showToast(
+          context, 'we couldn\'t saved your order at this time.', Colors.red);
     }
   }
 

@@ -72,10 +72,10 @@ class TrackingListScreen extends StatelessWidget {
                                           TextAlign.start,
                                           null),
                                       buildTitlenSubtitleText(
-                                          orderList[index].orderStatus ==
-                                                  'OrderStatus.SUBMITTED'
+                                          orderList[index].orderStatus !=
+                                                  'OrderStatus.DELIVERED'
                                               ? 'Pending'
-                                              : getCreationDate(),
+                                              : orderList[index].deliveryDate,
                                           Colors.black26,
                                           13,
                                           FontWeight.w700,
@@ -99,21 +99,22 @@ class TrackingListScreen extends StatelessWidget {
                                                     orderId: orderList[index]
                                                         .orderID,
                                                     pickUpDate:
-                                                        orderList[index].date,
+                                                    orderList[index].date,
                                                     dropOffDate: orderList[
-                                                                    index]
-                                                                .orderStatus ==
-                                                            'OrderStatus.SUBMITTED'
+                                                    index]
+                                                        .orderStatus !=
+                                                        'OrderStatus.DELIVERED'
                                                         ? 'Pending'
-                                                        : getCreationDate(),
+                                                        : orderList[index]
+                                                        .deliveryDate,
                                                     pickUpState:
-                                                        orderList[index]
-                                                                .pickUpAddress[
-                                                            'stateName'],
+                                                    orderList[index]
+                                                        .pickUpAddress[
+                                                    'stateName'],
                                                     destinationState: orderList[
-                                                                index]
-                                                            .destinationAddress[
-                                                        'stateName'],
+                                                    index]
+                                                        .destinationAddress[
+                                                    'stateName'],
                                                     index: orderList[index]
                                                         .trackState,
                                                   )));
