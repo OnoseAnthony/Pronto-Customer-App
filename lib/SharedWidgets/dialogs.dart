@@ -4,12 +4,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fronto/Screens/wrapper.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/text.dart';
+import 'package:fronto/constants.dart';
 
 class LoaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SpinKitWanderingCubes(
-      color: Colors.white,
+      color: kWhiteColor,
       size: 30.0,
     );
   }
@@ -22,7 +23,7 @@ Dialog NavigationLoader(BuildContext context) {
     child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
-        color: Colors.blue,
+        color: kPrimaryColor,
       ),
       height: 80.0,
       child: Padding(
@@ -35,7 +36,7 @@ Dialog NavigationLoader(BuildContext context) {
             SizedBox(
               width: 30,
             ),
-            buildTitlenSubtitleText('please wait a moment...', Colors.white, 14,
+            buildTitlenSubtitleText('please wait a moment...', kWhiteColor, 14,
                 FontWeight.bold, TextAlign.center, null),
           ],
         ),
@@ -82,8 +83,8 @@ Dialog ErrorDialog(context) {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 FlatButton(
-                    textColor: Colors.white,
-                    color: Colors.blue,
+                    textColor: kWhiteColor,
+                    color: kPrimaryColor,
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -94,13 +95,13 @@ Dialog ErrorDialog(context) {
                   width: 20,
                 ),
                 FlatButton(
-                    textColor: Colors.white,
+                    textColor: kWhiteColor,
                     color: Colors.black54,
                     onPressed: () {
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(builder: (context) => Wrapper()),
-                              (route) => false);
+                          (route) => false);
                     },
                     child: Text('NO')),
               ],
@@ -136,7 +137,7 @@ Dialog completeDialog(context) {
             ),
             SizedBox(height: 15),
             buildTitlenSubtitleText(
-                'Order request has been successfully processed. An agent will contact you soon',
+                'Order request has been successfully processed.\nAn agent will contact you soon',
                 Colors.black,
                 12,
                 FontWeight.w600,
@@ -145,25 +146,20 @@ Dialog completeDialog(context) {
             SizedBox(
               height: 10,
             ),
-            buildTitlenSubtitleText(
-                'Proceed to dashboard?', Colors.black, 12, FontWeight.w600,
-                TextAlign.start, null),
-            SizedBox(
-              height: 10,
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 FlatButton(
-                    textColor: Colors.white,
-                    color: Colors.blue,
-                    onPressed: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => Wrapper()),
-                              (route) => false);
-                    },
-                    child: Text('YES')),
+                  color: kPrimaryColor,
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => Wrapper()),
+                        (route) => false);
+                  },
+                  child: buildTitlenSubtitleText('Proceed to dashboard',
+                      kWhiteColor, 12, FontWeight.w600, TextAlign.start, null),
+                ),
               ],
             ),
           ],
@@ -173,7 +169,7 @@ Dialog completeDialog(context) {
   );
 }
 
-showToast(context, String msg, Color color) {
+showToast(context, String msg, Color color, bool isError) {
   FToast fToast = FToast();
   fToast.init(context);
 
@@ -181,17 +177,17 @@ showToast(context, String msg, Color color) {
     padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(25.0),
-      color: color != null ? color : Colors.blue,
+      color: color != null ? color : kPrimaryColor,
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        getIcon(Icons.check, 20, Colors.white),
+        getIcon(isError ? Icons.cancel : Icons.check, 20, kWhiteColor),
         SizedBox(
           width: 12.0,
         ),
         buildTitlenSubtitleText(
-            msg, Colors.white, 14, FontWeight.normal, TextAlign.start, null)
+            msg, kWhiteColor, 14, FontWeight.normal, TextAlign.start, null)
       ],
     ),
   );
@@ -199,7 +195,7 @@ showToast(context, String msg, Color color) {
   fToast.showToast(
     child: toast,
     gravity: ToastGravity.TOP,
-    toastDuration: Duration(seconds: 4),
+    toastDuration: Duration(seconds: 2),
   );
 
 }

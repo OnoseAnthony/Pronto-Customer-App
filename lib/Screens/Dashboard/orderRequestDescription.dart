@@ -9,6 +9,7 @@ import 'package:fronto/SharedWidgets/customListTile.dart';
 import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/SharedWidgets/textFormField.dart';
+import 'package:fronto/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -27,16 +28,20 @@ class _OrderScreenState extends State<OrderScreen> {
   TextEditingController itemController = TextEditingController();
   TextEditingController receiverPhoneController = TextEditingController();
   TextEditingController receiverNameController = TextEditingController();
+  TextEditingController houseStreetNameController = TextEditingController();
 
   String _hintText;
   File _staticReceiverImage;
   File _staticItemImage;
+  bool isItemImageLoading = false;
+  bool isReceiverImageLoading = false;
 
   @override
   void dispose() {
     itemController.dispose();
     receiverPhoneController.dispose();
     receiverNameController.dispose();
+    houseStreetNameController.dispose();
     super.dispose();
   }
 
@@ -48,7 +53,7 @@ class _OrderScreenState extends State<OrderScreen> {
 
     return Material(
       elevation: 10,
-      color: Colors.white,
+      color: kWhiteColor,
       borderRadius: BorderRadius.only(
           topRight: Radius.circular(20), topLeft: Radius.circular(20)),
       child: ListView(
@@ -66,6 +71,11 @@ class _OrderScreenState extends State<OrderScreen> {
             height: 20,
           ),
           buildNonEditTextField(_hintText, null),
+          SizedBox(
+            height: 30,
+          ),
+          buildTextField(
+              'House Number / Street Name', houseStreetNameController, false),
           SizedBox(
             height: 20,
           ),
@@ -112,7 +122,7 @@ class _OrderScreenState extends State<OrderScreen> {
                 SizedBox(
                   height: 15,
                 ),
-                buildTextField('Description', itemController),
+                buildTextField('Description', itemController, false),
                 SizedBox(
                   height: 35,
                 ),
@@ -120,12 +130,13 @@ class _OrderScreenState extends State<OrderScreen> {
                 SizedBox(
                   height: 15,
                 ),
-                buildTextField('Name of receiver', receiverNameController),
+                buildTextField(
+                    'Name of receiver', receiverNameController, false),
                 SizedBox(
                   height: 30,
                 ),
                 buildTextField(
-                    'Phone number of receiver', receiverPhoneController),
+                    'Phone number of receiver', receiverPhoneController, true),
               ],
             ),
           ),
@@ -136,28 +147,39 @@ class _OrderScreenState extends State<OrderScreen> {
             onTap: () {
               if (_formKey.currentState.validate() &&
                   _staticItemImage != null &&
-                  _staticReceiverImage != null) {
+                  _staticReceiverImage != null &&
+                  Provider.of<AppData>(context, listen: false).pickUpLocation !=
+                      null) {
                 orderRequest orderData = orderRequest(
                   receiverImage: _staticReceiverImage,
                   itemImage: _staticItemImage,
                   receiverInfo: receiverNameController.text,
                   receiverPhone: receiverPhoneController.text,
                   itemDescription: itemController.text,
+                  streetHouseName: houseStreetNameController.text,
                 );
+
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => OrderSummary()));
 
                 Provider.of<AppData>(context, listen: false)
                     .updateOrderRequest(orderData);
-
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => OrderSummary()));
               } else if (_staticItemImage == null)
                 showToast(context, 'Please upload a clear photo of the item',
-                    Colors.red);
+                    kErrorColor, true);
               else if (_staticReceiverImage == null)
-                showToast(context,
-                    'Please upload a clear photo of the receiver', Colors.red);
+                showToast(
+                    context,
+                    'Please upload a clear photo of the receiver',
+                    kErrorColor,
+                    true);
+              else if (Provider.of<AppData>(context, listen: false)
+                      .pickUpLocation ==
+                  null)
+                showToast(
+                    context, 'Please enter pickup location', kErrorColor, true);
             },
-            child: buildSubmitButton('SEND ITEM', 25.0),
+            child: buildSubmitButton('SEND ITEM', 25.0, false),
           ),
           SizedBox(
             height: 20,
@@ -167,37 +189,71 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  _buildRow(String info, String label) {
-    return Row(
-      children: [
-        InkWell(
-          onTap: () async {
-            var tempImage = await ImagePicker.pickImage(
-                source: ImageSource.gallery);
-            if (label == 'receiverImage') {
-              setState(() {
-                _staticReceiverImage = tempImage;
-              });
-            } else {
-              setState(() {
-                _staticItemImage = tempImage;
-              });
-            }
-          },
-          child: label == 'receiverImage' && _staticReceiverImage != null
-              ? buildContainerImage(_staticReceiverImage)
-              : label == 'itemImage' && _staticItemImage != null
-              ? buildContainerImage(_staticItemImage)
-              : buildContainerIcon(Icons.camera_alt),
-        ),
-        SizedBox(
-          width: 20,
-        ),
-        buildTitlenSubtitleText(
-            info, Colors.black, 15, FontWeight.normal, TextAlign.start, null),
-      ],
+  _buildRow(
+    String info,
+    String label,
+  ) {
+    return InkWell(
+      onTap: () async {
+        if (label == 'receiverImage')
+          setState(() {
+            isReceiverImageLoading = true;
+          });
+        else
+          setState(() {
+            isItemImageLoading = true;
+          });
+        var tempImage = await ImagePicker.pickImage(
+            source: ImageSource.gallery, imageQuality: 65);
+        if (label == 'receiverImage') {
+          setState(() {
+            _staticReceiverImage = tempImage;
+          });
+        } else {
+          setState(() {
+            _staticItemImage = tempImage;
+          });
+        }
+        setState(() {
+          isItemImageLoading = false;
+          isReceiverImageLoading = false;
+        });
+      },
+      child: Row(
+        children: [
+          isReceiverImageLoading && label == 'receiverImage'
+              ? Container(
+                  height: 35,
+                  width: 35,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
+                  ))
+              : isItemImageLoading && label == 'itemImage'
+                  ? Container(
+                      height: 35,
+                      width: 35,
+                      child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(kPrimaryColor),
+                      ))
+                  : label == 'receiverImage' && _staticReceiverImage != null
+                      ? buildContainerImage(
+                          _staticReceiverImage, Colors.grey[400])
+                      : label == 'itemImage' && _staticItemImage != null
+                          ? buildContainerImage(
+                              _staticItemImage, Colors.grey[400])
+                          : buildContainerIcon(
+                              Icons.camera_alt,
+                              label == 'receiverImage'
+                                  ? Color(0xFF27AE60)
+                                  : kPrimaryColor),
+          SizedBox(
+            width: 20,
+          ),
+          buildTitlenSubtitleText(
+              info, Colors.black, 15, FontWeight.normal, TextAlign.start, null),
+        ],
+      ),
     );
   }
-
-
 }

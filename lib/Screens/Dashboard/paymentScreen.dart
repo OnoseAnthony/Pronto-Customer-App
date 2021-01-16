@@ -5,6 +5,7 @@ import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:fronto/DataHandler/appData.dart';
 import 'package:fronto/Models/cards.dart';
 import 'package:fronto/Services/cardServices.dart';
+import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/Services/firebase/firestore.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/dialogs.dart';
@@ -85,7 +86,9 @@ class _PaymentPageState extends State<PaymentPage> {
                                 scrollDirection: Axis.horizontal,
                                 itemBuilder: (context, index) {
                                   return buildCardScrollView(
-                                      'assets/images/creditCardSkin.png',
+                                      widget.type == 'pay'
+                                          ? 'assets/images/creditCardSkin.png'
+                                          : 'assets/images/prontoCreditCardSkin.png',
                                       widthSize,
                                       cardList[index].cardNumber,
                                       cardList[index].cvv,
@@ -114,15 +117,22 @@ class _PaymentPageState extends State<PaymentPage> {
                             children: [
                               Checkbox(
                                 activeColor: kPrimaryColor,
-                                checkColor: kContainerIconColor,
+                                checkColor: kWhiteColor,
                                 value: value,
                                 onChanged: (bool) {
-                                  if (!value) {
+                                  if (!value &&
+                                      _formKey.currentState.validate()) {
                                     _showDialog(1);
-                                  } else {
+                                  } else if (value) {
                                     setState(() {
                                       value = bool;
                                     });
+                                  } else {
+                                    showToast(
+                                        context,
+                                        'Please enter card information',
+                                        kErrorColor,
+                                        true);
                                   }
                                 },
                               ),
@@ -169,7 +179,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                   context,
                                   reference,
                                   widget.chargeAmount,
-                                  'oanthony590@gmail.com',
+                                  AuthService().getCurrentUser().email,
                                   getCardFromUI(_expDate, _cardNumber, _cvv));
 
                               if (response) {
@@ -177,14 +187,17 @@ class _PaymentPageState extends State<PaymentPage> {
                                     .updatePaymentReference(reference);
                                 Provider.of<AppData>(context, listen: false)
                                     .updatePaymentStatus('Successful');
+                                Provider.of<AppData>(context, listen: false)
+                                    .updateChargeAmount(widget.chargeAmount);
                                 showToast(
                                     context,
                                     'Payment Successful. Processing Order...',
-                                    Colors.green);
+                                    kPrimaryColor,
+                                    false);
                                 await handleOnSuccess(context);
                               } else {
-                                showToast(
-                                    context, 'Payment Failed', Colors.red);
+                                showToast(context, 'Payment Failed',
+                                    kErrorColor, true);
                                 handleOnError(context);
                               }
 
@@ -219,7 +232,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               });
 
                               showToast(context, 'Card added successfully',
-                                  Colors.green);
+                                  kPrimaryColor, false);
                             }
                             break;
                         }
@@ -232,7 +245,8 @@ class _PaymentPageState extends State<PaymentPage> {
                                   : !loading && widget.type == 'pay'
                                       ? 'CHARGE CARD'
                                       : 'ADD CARD',
-                          25.0),
+                          25.0,
+                          false),
                     ),
                   ],
                 ),
@@ -289,7 +303,7 @@ class _PaymentPageState extends State<PaymentPage> {
             children: <Widget>[
               Icon(
                 Icons.info,
-                color: Colors.red,
+                color: kErrorColor,
                 size: 60,
               ),
               SizedBox(height: 15),
@@ -317,8 +331,8 @@ class _PaymentPageState extends State<PaymentPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   FlatButton(
-                      textColor: Colors.white,
-                      color: Colors.blue,
+                      textColor: kWhiteColor,
+                      color: kPrimaryColor,
                       onPressed: () {
                         if (widget.type == 'pay') {
                           setState(() {
@@ -334,9 +348,9 @@ class _PaymentPageState extends State<PaymentPage> {
                         Navigator.pop(context);
                         widget.type != 'pay'
                             ? showToast(context, 'Card removed successfully',
-                                Colors.green)
+                                kPrimaryColor, false)
                             : showToast(context, 'Card Saved successfully',
-                                Colors.green);
+                                kPrimaryColor, false);
                       },
                       child: Text(
                         'YES',
@@ -345,7 +359,7 @@ class _PaymentPageState extends State<PaymentPage> {
                     width: 20,
                   ),
                   FlatButton(
-                      textColor: Colors.white,
+                      textColor: kWhiteColor,
                       color: Colors.black54,
                       onPressed: () {
                         if (widget.type == 'pay') {
@@ -397,7 +411,7 @@ class _PaymentPageState extends State<PaymentPage> {
                     context,
                     reference,
                     widget.chargeAmount,
-                    'oanthony590@gmail.com',
+                    AuthService().getCurrentUser().email,
                     getCardFromSharedPreference(
                         expMonth, expYear, cardNumber, cvv),
                   );
@@ -407,13 +421,16 @@ class _PaymentPageState extends State<PaymentPage> {
                         .updatePaymentReference(reference);
                     Provider.of<AppData>(context, listen: false)
                         .updatePaymentStatus('Successful');
+                    Provider.of<AppData>(context, listen: false)
+                        .updateChargeAmount(widget.chargeAmount);
                     showToast(
                         context,
                         'Payment Successful. Processing order...',
-                        Colors.green);
+                        kPrimaryColor,
+                        false);
                     await handleOnSuccess(context);
                   } else {
-                    showToast(context, 'Payment Failed', Colors.red);
+                    showToast(context, 'Payment Failed', kErrorColor, true);
                     handleOnError(context);
                   }
 
@@ -429,7 +446,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 padding: EdgeInsets.symmetric(horizontal: 13),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  color: kContainerIconColor,
+                  color: kWhiteColor,
                 ),
                 child: Center(
                   child: Text(
@@ -455,13 +472,13 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
               buildTitlenSubtitleText(
                   '**** **** **** ${cardNumber.substring(cardNumber.length - 4)}',
-                  Colors.white,
+                  kWhiteColor,
                   25,
                   FontWeight.normal,
                   TextAlign.start,
                   null),
-              buildTitlenSubtitleText('${expMonth}/${expYear}', Colors.white,
-                  16, FontWeight.normal, TextAlign.start, TextOverflow.visible),
+              buildTitlenSubtitleText('${expMonth}/${expYear}', kWhiteColor, 16,
+                  FontWeight.normal, TextAlign.start, TextOverflow.visible),
             ],
           ),
         ),
@@ -517,7 +534,7 @@ class _PaymentPageState extends State<PaymentPage> {
             children: <Widget>[
               Icon(
                 Icons.info,
-                color: Colors.red,
+                color: kErrorColor,
                 size: 60,
               ),
               SizedBox(height: 15),
@@ -527,8 +544,8 @@ class _PaymentPageState extends State<PaymentPage> {
                 height: 10,
               ),
               FlatButton(
-                  textColor: Colors.white,
-                  color: Colors.blue,
+                  textColor: kWhiteColor,
+                  color: kPrimaryColor,
                   onPressed: () {
                     Navigator.pop(context);
                   },
@@ -562,8 +579,8 @@ class _PaymentPageState extends State<PaymentPage> {
       );
     } else {
       Navigator.pop(context);
-      showToast(
-          context, 'we couldn\'t saved your order at this time.', Colors.red);
+      showToast(context, 'we couldn\'t saved your order at this time.',
+          kErrorColor, true);
     }
   }
 

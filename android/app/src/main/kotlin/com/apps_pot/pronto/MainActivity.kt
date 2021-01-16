@@ -1,4 +1,4 @@
-package com.apps_pot.fronto
+package com.apps_pot.pronto
 
 import io.flutter.embedding.android.FlutterActivity
 

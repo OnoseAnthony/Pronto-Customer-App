@@ -8,6 +8,7 @@ import 'package:fronto/SharedWidgets/customListTile.dart';
 import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/predictedAddressTile.dart';
 import 'package:fronto/SharedWidgets/text.dart';
+import 'package:fronto/Utils/customDirectionIcon.dart';
 import 'package:fronto/constants.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +46,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Positioned.fill(
             child: Material(
               elevation: 10,
-              color: Colors.white,
+              color: kWhiteColor,
               borderRadius: BorderRadius.only(
                   topRight: Radius.circular(20), topLeft: Radius.circular(20)),
               child: ListView(
@@ -67,14 +68,14 @@ class _SearchScreenState extends State<SearchScreen> {
                     onTap: () {},
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: kWhiteColor,
                         borderRadius: BorderRadius.circular(3.0),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black54,
-                            blurRadius: 6.0,
-                            spreadRadius: 0.5,
-                            offset: Offset(0.7, 0.7),
+                            blurRadius: 3.0,
+                            spreadRadius: 0.25,
+                            offset: Offset(0.35, 0.35),
                           )
                         ],
                       ),
@@ -84,7 +85,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           children: [
                             Icon(
                               Icons.search,
-                              color: Colors.blue,
+                              color: kPrimaryColor,
                             ),
                             SizedBox(
                               width: 10.0,
@@ -124,35 +125,40 @@ class _SearchScreenState extends State<SearchScreen> {
                           },
                         )
                       : Container(),
-                  buildCustomListTile(
-                      getIcon(Icons.location_on_outlined, 25, Colors.grey[600]),
-                      Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              height: 3,
-                            ),
-                            buildTitlenSubtitleText('Location', Colors.black,
-                                13, FontWeight.bold, TextAlign.start, null),
-                            buildTitlenSubtitleText(
-                                Provider.of<AppData>(context).pickUpLocation !=
-                                        null
-                                    ? Provider.of<AppData>(context)
-                                        .pickUpLocation
-                                        .placeName
-                                    : "unknown location",
-                                Colors.grey,
-                                12,
-                                FontWeight.normal,
-                                TextAlign.start,
-                                null),
-                          ],
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: buildCustomListTile(
+                        getIcon(
+                            Icons.location_on_outlined, 25, Colors.grey[600]),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 3,
+                              ),
+                              buildTitlenSubtitleText('Location', Colors.black,
+                                  13, FontWeight.bold, TextAlign.start, null),
+                              buildTitlenSubtitleText(
+                                  Provider.of<AppData>(context)
+                                              .pickUpLocation !=
+                                          null
+                                      ? Provider.of<AppData>(context)
+                                          .pickUpLocation
+                                          .placeName
+                                      : "unknown location",
+                                  Colors.grey,
+                                  12,
+                                  FontWeight.normal,
+                                  TextAlign.start,
+                                  null),
+                            ],
+                          ),
                         ),
-                      ),
-                      null,
-                      5.0,
-                      false),
+                        null,
+                        5.0,
+                        false),
+                  ),
                   SizedBox(
                     height: 20,
                   ),
@@ -161,9 +167,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: InkWell(
                       onTap: () {
                         showToast(context, 'Please enter package destination',
-                            Colors.red);
+                            kErrorColor, true);
                       },
-                      child: buildSubmitButton('NEXT', 25.0),
+                      child: buildSubmitButton('NEXT', 25.0, false),
                     ),
                   ),
                   SizedBox(
@@ -184,38 +190,30 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  buildSearchField(String hintText, IconData iconData,
-      TextEditingController controller, bool readOnly) {
-    return Row(
-      children: [
-        Icon(iconData),
-        SizedBox(width: 10.0),
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(3.0),
-              child: TextFormField(
-                readOnly: readOnly,
-                onChanged: (val) {
-                  _getDestinationAddress(val);
-                },
-                controller: controller,
-                decoration: InputDecoration(
-                    hintText: hintText,
-                    fillColor: Colors.grey[200],
-                    filled: true,
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding:
-                    EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0)),
-              ),
-            ),
-          ),
+  buildSearchField(
+      String hintText, TextEditingController controller, bool readOnly) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(3.0),
+        child: TextFormField(
+          readOnly: readOnly,
+          onChanged: (val) {
+            _getDestinationAddress(val);
+          },
+          controller: controller,
+          decoration: InputDecoration(
+              hintText: hintText,
+              fillColor: Colors.grey[200],
+              filled: true,
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding:
+                  EdgeInsets.only(left: 12.0, top: 12.0, bottom: 12.0)),
         ),
-      ],
+      ),
     );
   }
 
@@ -248,19 +246,40 @@ class _SearchScreenState extends State<SearchScreen> {
           SizedBox(
             height: 12,
           ),
-          Padding(
-            padding: EdgeInsets.only(left: 13, right: 15),
-            child: buildSearchField(
-                'Pickup location', Icons.location_on, pickUpController, true),
-          ),
-          SizedBox(
-            height: 5,
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 13, right: 15),
-            child: buildSearchField(
-                'Enter destination', Icons.location_on, destinationController,
-                false),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 25, right: 5, top: 25),
+                  child: CustomPaint(
+                      painter: locatorIcon(
+                          radius: 5.0, color: kPrimaryColor, lineHeight: 40)),
+                ),
+              ),
+              Flexible(
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 13, right: 15),
+                        child: buildSearchField(
+                            'Pickup location', pickUpController, true),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 13, right: 15),
+                        child: buildSearchField(
+                            'Enter destination', destinationController, false),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           SizedBox(
             height: size * 0.011,
@@ -273,8 +292,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   _getDestinationAddress(String addressName) async {
     if (addressName.length == 1)
-      showToast(context, 'Fetching predictions', null);
-
+      showToast(context, 'Fetching predictions', null, false);
 
     if (addressName.length > 1) {
       String url =

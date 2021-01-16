@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fronto/Screens/Dashboard/homeScreen.dart';
+import 'package:fronto/Screens/wrapper.dart';
 import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/dialogs.dart';
 import 'package:fronto/SharedWidgets/text.dart';
 import 'package:fronto/SharedWidgets/textFormField.dart';
+import 'package:fronto/constants.dart';
 
 class AddEmailAddress extends StatefulWidget {
   @override
@@ -38,7 +39,8 @@ class _AddEmailAddressState extends State<AddEmailAddress> {
                 SizedBox(
                   height: 40,
                 ),
-                buildEmailTextField('Email Address', _controller),
+                buildEmailTextField(
+                    'Email Address', _controller, TextInputType.emailAddress),
                 SizedBox(
                   height: 100,
                 ),
@@ -59,17 +61,21 @@ class _AddEmailAddressState extends State<AddEmailAddress> {
 
                         showToast(
                             context,
-                            'Email has been updating successfully!!',
-                            Colors.green);
+                            'Email has been updated successfully!!',
+                            kPrimaryColor,
+                            false);
 
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => HomeScreen()));
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) => Wrapper()));
+                      } else {
+                        Navigator.pop(context);
+
+                        showToast(context, 'Error occurred! Try again later',
+                            kErrorColor, true);
                       }
                     }
                   },
-                  child: buildSubmitButton('NEXT', 25.0),
+                  child: buildSubmitButton('NEXT', 25.0, false),
                 ),
               ],
             ),

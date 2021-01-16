@@ -28,16 +28,22 @@ class _DirectionScreenState extends State<DirectionScreen> {
   Set<Marker> mapMarkers = {};
   Set<Circle> mapMarkerCircles = {};
   bool _locationButton = false;
+  BitmapDescriptor markerIcon;
 
   static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
+    target: LatLng(9.072264, 7.491302),
     zoom: 15,
   );
 
   @override
   void initState() {
-    _displayDirectionsOnMap();
     super.initState();
+    _displayDirectionsOnMap();
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(48, 48)), 'assets/images/truck1.png')
+        .then((onValue) {
+      markerIcon = onValue;
+    });
   }
 
   @override
@@ -83,7 +89,7 @@ class _DirectionScreenState extends State<DirectionScreen> {
               child: Container(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),
-                    color: Colors.white),
+                    color: kWhiteColor),
                 height: 45,
                 width: 45,
                 margin: EdgeInsets.only(left: 10, right: 10, top: size * 0.07),
@@ -154,7 +160,7 @@ class _DirectionScreenState extends State<DirectionScreen> {
 
     setState(() {
       Polyline polyLine = Polyline(
-        color: Colors.black,
+        color: kPrimaryColor,
         polylineId: PolylineId("PolylineID"),
         jointType: JointType.round,
         points: polyLineCoordinates,
@@ -189,7 +195,7 @@ class _DirectionScreenState extends State<DirectionScreen> {
         .animateCamera(CameraUpdate.newLatLngBounds(directionBounds, 70));
 
     Marker pickUpMarker = Marker(
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      icon: markerIcon,
       infoWindow: InfoWindow(
           title: '${pickUp.placeName} ${tripInfo.durationText}',
           snippet: "my Location ${tripInfo.distanceText}"),
@@ -198,7 +204,7 @@ class _DirectionScreenState extends State<DirectionScreen> {
     );
 
     Marker destinationMarker = Marker(
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      icon: markerIcon,
       infoWindow: InfoWindow(
           title: '${destination.placeName} ${tripInfo.durationText}',
           snippet: "Destination Location ${tripInfo.distanceText}"),
@@ -207,20 +213,20 @@ class _DirectionScreenState extends State<DirectionScreen> {
     );
 
     Circle pickUpMarkerCircle = Circle(
-      fillColor: Colors.white,
+      fillColor: kWhiteColor,
       center: pickUpLatLng,
       radius: 10,
       strokeWidth: 3,
-      strokeColor: Colors.white,
+      strokeColor: kWhiteColor,
       circleId: CircleId("pickUpId"),
     );
 
     Circle destinationMarkerCircle = Circle(
-      fillColor: Colors.white,
+      fillColor: kWhiteColor,
       center: destinationLatLng,
       radius: 10,
       strokeWidth: 3,
-      strokeColor: Colors.white,
+      strokeColor: kWhiteColor,
       circleId: CircleId("destinationId"),
     );
 

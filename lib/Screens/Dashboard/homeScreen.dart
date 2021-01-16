@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fronto/DataHandler/appData.dart';
 import 'package:fronto/Models/address.dart';
+import 'package:fronto/Screens/Dashboard/DrawerScreens/notification.dart';
 import 'package:fronto/Screens/Dashboard/searchScreen.dart';
 import 'package:fronto/Services/mapServices.dart';
 import 'package:fronto/Services/requestAssistant.dart';
@@ -21,6 +22,13 @@ import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
+  bool fromLocationHandler;
+  Position positionFromLocationHandler;
+
+  HomeScreen(
+      {@required this.fromLocationHandler,
+      @required this.positionFromLocationHandler});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -33,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _locationButton = false;
 
   static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
+    target: LatLng(9.072264, 7.491302),
     zoom: 15,
   );
 
@@ -42,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     double size = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      backgroundColor: kWhiteColor,
       key: _scaffoldKey,
       drawer: buildDrawer(
         context,
@@ -54,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
             initialCameraPosition: _kGooglePlex,
             myLocationEnabled: true,
             zoomControlsEnabled: false,
-            trafficEnabled: true,
+            trafficEnabled: false,
             myLocationButtonEnabled: _locationButton,
             onMapCreated: (GoogleMapController controller) {
               _googleMapController.complete(controller);
@@ -71,24 +80,55 @@ class _HomeScreenState extends State<HomeScreen> {
           Positioned(
             top: 0.0,
             left: 8,
-            child: InkWell(
-              onTap: () {
-                _scaffoldKey.currentState.openDrawer();
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    color: Colors.white),
-                height: 45,
-                width: 45,
-                margin: EdgeInsets.only(left: 10, right: 10, top: size * 0.07),
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Row(
-                  children: [
-                    getIcon(Icons.menu, 25, Colors.black),
-                  ],
+            right: 8,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                InkWell(
+                  onTap: () {
+                    _scaffoldKey.currentState.openDrawer();
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: kWhiteColor),
+                    height: 45,
+                    width: 45,
+                    margin:
+                        EdgeInsets.only(left: 10, right: 10, top: size * 0.07),
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        getIcon(Icons.menu, 25, Colors.black),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => NotificationScreen()));
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: kWhiteColor),
+                    height: 45,
+                    width: 45,
+                    margin:
+                        EdgeInsets.only(left: 10, right: 10, top: size * 0.07),
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        builddrawerIcon(
+                            'notification', 'assets/images/notification.svg'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Positioned(
@@ -100,16 +140,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   top: size * 0.02, left: 40, right: 40, bottom: size * 0.01),
               height: size * 0.42,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: kWhiteColor,
                 borderRadius: BorderRadius.only(
                     topRight: Radius.circular(20),
                     topLeft: Radius.circular(20)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black,
-                    blurRadius: 16.0,
-                    spreadRadius: 0.5,
-                    offset: Offset(0.7, 0.7),
+                    color: Colors.black26,
+                    blurRadius: 0.25,
                   )
                 ],
               ),
@@ -126,9 +164,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       null),
 
 
-
                   buildNonEditTextField(
-                      'Address',
+                      'Deliver to?',
                       () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -189,9 +226,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: InkWell(
                       onTap: () {
                         showToast(context, 'Please select package destination',
-                            Colors.red);
+                            kErrorColor, true);
                       },
-                      child: buildSubmitButton('NEXT', 25.0),
+                      child: buildSubmitButton('NEXT', 25.0, false),
                     ),
                   ),
                 ],
@@ -204,15 +241,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _getUserLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+    Position position = widget.fromLocationHandler
+        ? widget.positionFromLocationHandler
+        : await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
     _currentUserPosition = position;
 
     LatLng _userLatitudeLongitudePosition =
-    LatLng(_currentUserPosition.latitude, _currentUserPosition.longitude);
+        LatLng(_currentUserPosition.latitude, _currentUserPosition.longitude);
 
     CameraPosition _cameraPosition =
-    CameraPosition(target: _userLatitudeLongitudePosition, zoom: 15);
+        CameraPosition(target: _userLatitudeLongitudePosition, zoom: 15);
     _newGoogleMapController
         .animateCamera(CameraUpdate.newCameraPosition(_cameraPosition));
 
@@ -264,7 +303,7 @@ class _PickUpScreenState extends State<PickUpScreen> {
           Positioned.fill(
             child: Material(
               elevation: 10,
-              color: Colors.white,
+              color: kWhiteColor,
               borderRadius: BorderRadius.only(
                   topRight: Radius.circular(20), topLeft: Radius.circular(20)),
               child: ListView(
@@ -272,11 +311,10 @@ class _PickUpScreenState extends State<PickUpScreen> {
                 padding: EdgeInsets.only(
                     top: size * 0.1, left: 15, right: 20, bottom: size * 0.05),
                 children: [
-
                   predictedDestinationAddressList.length > 0
                       ? SizedBox(
-                    height: 80,
-                  )
+                          height: 80,
+                        )
                       : SizedBox(
                     height: 55,
                   ),
@@ -391,8 +429,7 @@ class _PickUpScreenState extends State<PickUpScreen> {
 
   _getNewLocationAddress(String addressName) async {
     if (addressName.length == 1)
-      showToast(context, 'Fetching predictions', null);
-
+      showToast(context, 'Fetching predictions', null, false);
 
     if (addressName.length > 1) {
       String url =

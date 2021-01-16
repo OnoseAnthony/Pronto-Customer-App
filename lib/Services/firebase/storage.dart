@@ -1,7 +1,6 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fronto/DataHandler/appData.dart';
 import 'package:fronto/Services/firebase/auth.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 Future<String> getAndUploadOrderImages(context, String name) async {
@@ -26,26 +25,23 @@ Future<String> getAndUploadOrderImages(context, String name) async {
     UploadTask task = firebaseStorageReference.putFile(tempImage);
     TaskSnapshot snapshot = await task;
     String url = await snapshot.ref.getDownloadURL();
-    print(
-        'url is **************************************************************************************************************************************************8*$url');
     return url;
   } catch (error) {
-    print(error.toString());
     throw error.toString();
   }
 }
 
-Future _getAndUploadImage(context) async {
-  final uid = Provider.of<AppData>(context, listen: false).userInfo.uid;
-  var tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
-
+Future<String> getAndUploadProfileImage(var tempImage) async {
+  final uid = AuthService().getCurrentUser().uid;
   try {
     final Reference firebaseStorageReference =
         FirebaseStorage.instance.ref().child('profilepics/$uid.jpg');
     UploadTask task = firebaseStorageReference.putFile(tempImage);
-    return await (await task.snapshot).ref.getDownloadURL();
+    TaskSnapshot snapshot = await task;
+    String url = await snapshot.ref.getDownloadURL();
+    return url;
   } catch (error) {
-    print(error.toString());
+    print(error);
     throw error.toString();
   }
 }

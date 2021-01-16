@@ -76,24 +76,37 @@ class AssistantMethods {
     return directions;
   }
 
-  static int calculateFare(context, Directions directions) {
+  static int calculateFare(context, Directions directions, bool isExpress) {
     double fare;
-    const exchangeRate = 500;
+    final pricePerMinute = 4;
+    final pricePerKm = 44.4;
+    final baseFare = 200;
 
-    //exchane rate is 1$ = NGN 500
-    //charging $0.20 per minute for the total time traveled
-    //charging $0.20 per kilometre for total kilometre traveled
+    final expressPricePerMinute = 4;
+    final expressPricePerKm = 66.6;
+    final expressBaseFare = 300;
 
-    double timeTraveledFare = (directions.durationValue / 60) * 0.20;
-    double distanceTraveledFare = (directions.distanceValue / 1000) * 0.20;
-    fare = timeTraveledFare + distanceTraveledFare;
+    //charging N4 per minute for the total time traveled
+    //charging N44.4 per kilometre for total kilometre traveled
+    //base fare N200
 
-    //Can be converted to Naira here by multiplying exchage rate with calculated fare
-    fare = fare * exchangeRate;
+    //charging N4 per minute for the total time traveled --EXPRESS DELIVERY
+    //charging N66.6 per kilometre for total kilometre traveled --EXPRESS DELIVERY
+    //base fare N300 --EXPRESS DELIVERY
 
-    Provider.of<AppData>(context, listen: false)
-        .updateChargeAmount(fare.truncate());
-
+    if (isExpress) {
+      double timeTraveledFare =
+          (directions.durationValue / 60) * expressPricePerMinute;
+      double distanceTraveledFare =
+          (directions.distanceValue / 1000) * expressPricePerKm;
+      fare = timeTraveledFare + distanceTraveledFare + expressBaseFare;
+    } else {
+      double timeTraveledFare =
+          (directions.durationValue / 60) * pricePerMinute;
+      double distanceTraveledFare =
+          (directions.distanceValue / 1000) * pricePerKm;
+      fare = timeTraveledFare + distanceTraveledFare + baseFare;
+    }
     return fare.truncate();
   }
 }

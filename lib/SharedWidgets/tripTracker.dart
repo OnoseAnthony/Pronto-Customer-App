@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fronto/SharedWidgets/buttons.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fronto/constants.dart';
 
 buildDestinationTracker(context, int index) {
   return Row(
@@ -11,68 +12,95 @@ buildDestinationTracker(context, int index) {
         width: 10,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.blue,
+          color: kPrimaryColor,
         ),
       ),
       Container(
         height: 2,
         width: MediaQuery.of(context).size.height * 0.06,
-        color: Colors.blue,
+        color: kPrimaryColor,
       ),
-      index == 0
+      index == 1
           ? Container(
-              height: 25,
+        height: 25,
               width: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.blue,
+                color: kPrimaryColor,
               ),
-              child: getIcon(Icons.message, 10, Colors.white),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: SvgPicture.asset(
+                  'assets/images/truck.svg',
+                  semanticsLabel: 'truck icon',
+                ),
+              ),
             )
           : Container(
               height: 10,
               width: 10,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.blue,
+                color: kPrimaryColor,
               ),
             ),
       Container(
         height: 2,
         width: MediaQuery.of(context).size.height * 0.07,
-        color: index == 1 || index == 2 ? Colors.blue : Colors.grey[300],
+        color: index == 2 || index == 3 ? kPrimaryColor : Colors.grey[300],
       ),
-      index == 1
+      index == 2
           ? Container(
-              height: 25,
+        height: 25,
               width: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.blue,
+                color: kPrimaryColor,
               ),
-              child: getIcon(Icons.message, 10, Colors.white),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: SvgPicture.asset(
+                  'assets/images/truck.svg',
+                  semanticsLabel: 'truck icon',
+                ),
+              ),
             )
           : Container(
               height: 10,
               width: 10,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: index == 2 ? Colors.blue : Colors.grey[300],
+                color: index == 3 ? kPrimaryColor : Colors.grey[300],
               ),
             ),
       Container(
         height: 2,
         width: MediaQuery.of(context).size.height * 0.08,
-        color: index == 2 ? Colors.blue : Colors.grey[300],
+        color: index == 3 ? kPrimaryColor : Colors.grey[300],
       ),
-      Container(
-        height: 10,
-        width: 10,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: index == 2 ? Colors.blue : Colors.grey[300],
-        ),
-      ),
+      index == 3
+          ? Container(
+              height: 25,
+              width: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: kPrimaryColor,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: SvgPicture.asset(
+                  'assets/images/Vector.svg',
+                ),
+              ),
+            )
+          : Container(
+              height: 10,
+              width: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey[300],
+              ),
+            ),
     ],
   );
 }

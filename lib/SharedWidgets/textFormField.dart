@@ -1,8 +1,10 @@
+import 'package:contact_picker/contact_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/Utils/cardInputFormatter.dart';
 import 'package:fronto/Utils/cardValidators.dart';
+import 'package:fronto/constants.dart';
 
 buildPhoneNumberTextField(
     String hintText, TextEditingController controller, Widget prefixIcon) {
@@ -27,7 +29,7 @@ buildPhoneNumberTextField(
           borderSide: BorderSide(color: Colors.black),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue),
+          borderSide: BorderSide(color: kPrimaryColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.black),
@@ -38,11 +40,14 @@ buildPhoneNumberTextField(
 }
 
 
-
-buildEmailTextField(String hintText, TextEditingController controller) {
+buildEmailTextField(String hintText, TextEditingController controller,
+    TextInputType textInputType) {
   return Container(
     child: TextFormField(
-      keyboardType: TextInputType.emailAddress,
+      minLines: textInputType == TextInputType.multiline ? 6 : null,
+      // any number you need (It works as the rows for the textarea)
+      maxLines: null,
+      keyboardType: textInputType,
       onChanged: (val) {},
       controller: controller,
       validator: (val) => val.isEmpty ? 'Field Cannot be empty' : null,
@@ -56,7 +61,7 @@ buildEmailTextField(String hintText, TextEditingController controller) {
           borderSide: BorderSide(color: Colors.black),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue),
+          borderSide: BorderSide(color: kPrimaryColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.black),
@@ -66,20 +71,50 @@ buildEmailTextField(String hintText, TextEditingController controller) {
   );
 }
 
-buildTextField(String hintText, TextEditingController controller) {
+buildTextField(
+    String hintText, TextEditingController controller, bool isReceiverNo) {
+  String number;
   return Container(
-    margin: EdgeInsets.symmetric(horizontal: 10),
     child: TextFormField(
+      keyboardType: isReceiverNo ? TextInputType.number : TextInputType.text,
       onChanged: (val) {},
       controller: controller,
-      validator: (val) => val.isEmpty ? 'Field Cannot be empty' : null,
+      validator: (val) => val.isEmpty && isReceiverNo && number != null
+          ? null
+          : val.isEmpty
+              ? 'Field Cannot be empty'
+              : null,
+      inputFormatters: isReceiverNo
+          ? [
+              FilteringTextInputFormatter.digitsOnly,
+              new LengthLimitingTextInputFormatter(11),
+            ]
+          : [],
       decoration: InputDecoration(
+          suffixIcon: isReceiverNo
+              ? InkWell(
+                  onTap: () async {
+                    final Contact contact =
+                        await ContactPicker().selectContact();
+                    controller.text = contact.phoneNumber.number;
+                    number = contact.phoneNumber.number;
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(bottom: 15),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: kPrimaryColor,
+                    ),
+                    child: getIcon(Icons.person, 20, kWhiteColor),
+                  ),
+                )
+              : null,
           isDense: true,
           hintText: hintText,
           hintStyle: TextStyle(
             fontSize: 14,
           ),
-          contentPadding: EdgeInsets.only(top: 12.0, bottom: 5.0)),
+          contentPadding: EdgeInsets.only(top: 15.0, bottom: 5.0)),
     ),
   );
 }
@@ -121,7 +156,7 @@ buildCreditCardNumberField(TextEditingController controller, String hintText) {
         borderSide: BorderSide(color: Colors.black),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
+        borderSide: BorderSide(color: kPrimaryColor),
       ),
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(color: Colors.black),
@@ -152,7 +187,7 @@ buildCvvNumberField(TextEditingController controller, String hintText, context) 
           borderSide: BorderSide(color: Colors.black),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue),
+          borderSide: BorderSide(color: kPrimaryColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.black),
@@ -190,7 +225,7 @@ buildExpiryNumberField(TextEditingController controller, String hintText,
           borderSide: BorderSide(color: Colors.black),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue),
+          borderSide: BorderSide(color: kPrimaryColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.black),
@@ -206,12 +241,12 @@ buildVerifyPhoneNumberField(TextEditingController controller,
     width: 35,
     height: 35,
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: kWhiteColor,
       borderRadius: BorderRadius.circular(3),
       boxShadow: [
         BoxShadow(
-          color: Colors.black54,
-          blurRadius: 5.0,
+          color: Colors.black26,
+          blurRadius: 0.25,
         )
       ],
     ),

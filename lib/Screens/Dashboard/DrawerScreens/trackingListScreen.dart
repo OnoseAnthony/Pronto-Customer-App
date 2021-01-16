@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fronto/Models/orders.dart';
 import 'package:fronto/Screens/Dashboard/DrawerScreens/trackingDetailScreen.dart';
 import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/Services/firebase/firestore.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/text.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:fronto/SharedWidgets/tripTracker.dart';
+import 'package:fronto/constants.dart';
 
 class TrackingListScreen extends StatelessWidget {
   @override
@@ -15,6 +15,7 @@ class TrackingListScreen extends StatelessWidget {
     double size = MediaQuery.of(context).size.height;
     User user = AuthService().getCurrentUser();
     return Scaffold(
+      backgroundColor: kBackgroundColor,
       body: Stack(
         children: [
           Container(
@@ -25,8 +26,8 @@ class TrackingListScreen extends StatelessWidget {
                   .getUserOrderList(),
               builder: (context, AsyncSnapshot snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.data != null) {
-                    List<Order> orderList = snapshot.data;
+                  List<Order> orderList = snapshot.data;
+                  if (snapshot.data != null && orderList.length >= 1) {
                     return ListView.builder(
                       padding: EdgeInsets.only(top: size * 0.15),
                       scrollDirection: Axis.vertical,
@@ -35,12 +36,11 @@ class TrackingListScreen extends StatelessWidget {
                         return Container(
                           margin: EdgeInsets.only(bottom: 20),
                           child: Card(
-                            borderOnForeground: false,
-                            shadowColor: Colors.white,
+                            shadowColor: kWhiteColor,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            elevation: 8,
+                            elevation: 3,
                             child: Padding(
                               padding: EdgeInsets.only(
                                   left: 30,
@@ -72,10 +72,13 @@ class TrackingListScreen extends StatelessWidget {
                                           TextAlign.start,
                                           null),
                                       buildTitlenSubtitleText(
-                                          orderList[index].orderStatus !=
+                                          orderList[index].orderStatus ==
                                                   'OrderStatus.DELIVERED'
-                                              ? 'Pending'
-                                              : orderList[index].deliveryDate,
+                                              ? orderList[index].deliveryDate
+                                              : orderList[index].orderStatus ==
+                                                      'OrderStatus.PENDING'
+                                                  ? 'Processing'
+                                                  : 'Pending',
                                           Colors.black26,
                                           13,
                                           FontWeight.w700,
@@ -84,43 +87,70 @@ class TrackingListScreen extends StatelessWidget {
                                     ],
                                   ),
                                   SizedBox(
-                                    height: 15,
+                                    height: 20,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      buildTitlenSubtitleText(
+                                          orderList[index]
+                                              .pickUpAddress['stateName'],
+                                          Colors.black54,
+                                          16,
+                                          FontWeight.w700,
+                                          TextAlign.start,
+                                          null),
+                                      buildTitlenSubtitleText(
+                                          orderList[index]
+                                              .destinationAddress['stateName'],
+                                          Colors.black54,
+                                          16,
+                                          FontWeight.w700,
+                                          TextAlign.start,
+                                          null),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  buildDestinationTracker(
+                                      context, orderList[index].trackState),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Center(
+                                    child: buildTitlenSubtitleText(
+                                        orderList[index].trackState == 3
+                                            ? 'Package delivered to ${orderList[index].destinationAddress['stateName']}'
+                                            : 'Heading to the city of ${orderList[index].destinationAddress['stateName']}',
+                                        Colors.black26,
+                                        13,
+                                        FontWeight.w700,
+                                        TextAlign.center,
+                                        null),
                                   ),
                                   SizedBox(
                                     height: 15,
                                   ),
                                   InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  TrackPackageDetailScreen(
-                                                    orderId: orderList[index]
-                                                        .orderID,
-                                                    pickUpDate:
-                                                    orderList[index].date,
-                                                    dropOffDate: orderList[
-                                                    index]
-                                                        .orderStatus !=
-                                                        'OrderStatus.DELIVERED'
-                                                        ? 'Pending'
-                                                        : orderList[index]
-                                                        .deliveryDate,
-                                                    pickUpState:
-                                                    orderList[index]
-                                                        .pickUpAddress[
-                                                    'stateName'],
-                                                    destinationState: orderList[
-                                                    index]
-                                                        .destinationAddress[
-                                                    'stateName'],
-                                                    index: orderList[index]
-                                                        .trackState,
-                                                  )));
-                                    },
-                                    child: buildSubmitButton(
-                                        'TRACKING INFORMATION', 5.0),
+                                    onTap: () => showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      enableDrag: false,
+                                      isDismissible: false,
+                                      builder: (context) => Container(
+                                        height:
+                                            MediaQuery.of(context).size.height,
+                                        child: TrackProductOnMap(
+                                          pickUpLocation:
+                                              orderList[index].pickUpAddress,
+                                          destinationLocation: orderList[index]
+                                              .destinationAddress,
+                                        ),
+                                      ),
+                                    ),
+                                    child: buildSubmitButton('VIEW', 5.0, true),
                                   ),
                                 ],
                               ),
@@ -130,98 +160,15 @@ class TrackingListScreen extends StatelessWidget {
                       },
                     );
                   } else {
-                    return Container(
-                        child: Center(
-                            child: Container(
-                      height: 80,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.blue,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top: 8.0, bottom: 8.0, left: 40, right: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Icon(
-                              Icons.info,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                            SizedBox(
-                              width: 30,
-                            ),
-                            buildTitlenSubtitleText(
-                                'No Package yet...',
-                                Colors.white,
-                                14,
-                                FontWeight.bold,
-                                TextAlign.center,
-                                null),
-                          ],
-                        ),
-                      ),
-                    )));
+                    return buildNullFutureBuilderStream(context, 'package');
                   }
                 } else {
-                  return Container(
-                    child: Center(
-                      child: Container(
-                        height: 80,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: Colors.blue,
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              top: 8.0, bottom: 8.0, left: 40, right: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              SpinKitWanderingCubes(
-                                color: Colors.white,
-                                size: 30.0,
-                              ),
-                              SizedBox(
-                                width: 30,
-                              ),
-                              buildTitlenSubtitleText(
-                                  'please wait a moment...',
-                                  Colors.white,
-                                  14,
-                                  FontWeight.bold,
-                                  TextAlign.center,
-                                  null),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
+                  return buildStreamBuilderLoader();
                 }
               },
             ),
           ),
-          Positioned(
-            top: size * 0.07,
-            left: 15.0,
-            child: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Row(
-                children: [
-                  getIcon(LineAwesomeIcons.times, 20, Colors.black),
-                  SizedBox(
-                    width: 25,
-                  ),
-                  buildTitlenSubtitleText('Track package', Colors.black, 18,
-                      FontWeight.w600, TextAlign.start, null),
-                ],
-              ),
-            ),
-          ),
+          getDrawerNavigator(context, size, 'Track package'),
         ],
       ),
     );

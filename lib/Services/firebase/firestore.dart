@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fronto/DataHandler/appData.dart';
 import 'package:fronto/Models/orders.dart';
+import 'package:fronto/Models/promotion.dart';
 import 'package:fronto/Models/users.dart';
 import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/Services/firebase/storage.dart';
@@ -17,32 +18,54 @@ class DatabaseService {
 
   //collection reference for user profile
   final CollectionReference userProfileCollection =
-  FirebaseFirestore.instance.collection('CustomUser');
+      FirebaseFirestore.instance.collection('Customers');
+
+  //collection reference for user profile
+  final CollectionReference riderProfileCollection =
+      FirebaseFirestore.instance.collection('Riders');
 
   //collection reference for orders
   final CollectionReference userOrderCollection =
-  FirebaseFirestore.instance.collection('Orders');
+      FirebaseFirestore.instance.collection('Orders');
 
-  Future updateUserProfileData(bool isDriver, String fName, String lName,
-      String photoUrl) async {
+  //collection reference for notifications
+  final CollectionReference notificationCollection =
+      FirebaseFirestore.instance.collection('Notifications');
+
+  //collection reference for promotions
+  final CollectionReference promotionCollection =
+      FirebaseFirestore.instance.collection('Promotions');
+
+  //collection reference for orders
+  final CollectionReference userSupportCollection =
+      FirebaseFirestore.instance.collection('Support');
+
+  Future<bool> updateUserProfileData(
+      String fName, String lName, String photoUrl, String deviceToken) async {
     CustomUser customUser = CustomUser(
       uid: firebaseUser.uid,
-      isDriver: isDriver,
       fName: fName,
       lName: lName,
       photoUrl: photoUrl,
     );
-    Provider.of<AppData>(context, listen: false).updateUserInfo(customUser);
-    return await userProfileCollection.doc(firebaseUser.uid).set({
-      'uid': firebaseUser.uid,
-      'isDriver': isDriver,
-      'fName': fName,
-      'lName': lName,
-      'photoUrl': photoUrl
-    });
+    try {
+      await userProfileCollection.doc(firebaseUser.uid).set({
+        'uid': firebaseUser.uid,
+        'fName': fName,
+        'lName': lName,
+        'emailAddress': firebaseUser.email,
+        'phoneNumber': firebaseUser.phoneNumber,
+        'photoUrl': photoUrl,
+        'deviceToken': deviceToken,
+      });
+      Provider.of<AppData>(context, listen: false).updateUserInfo(customUser);
+      return Future.value(true);
+    } catch (e) {
+      return Future.value(false);
+    }
   }
 
-  // Function to check if the uid exists in the firestore custom user collection
+  // Function to check if the uid exists in the firestore customer collection
   Future<bool> checkUser() async {
     var document = await userProfileCollection.doc(firebaseUser.uid).get();
     if (document.exists)
@@ -51,12 +74,10 @@ class DatabaseService {
       return Future.value(false);
   }
 
-  // Function to check if the isDriver Field is true of false in the firestore custom user collection
-  Future<bool> checkUserIsDriver() async {
-    DocumentSnapshot document =
-    await userProfileCollection.doc(firebaseUser.uid).get();
-    bool isDriver = document.get('isDriver');
-    if (isDriver == true)
+  // Function to check if the uid exists in the firestore rider collection
+  Future<bool> checkRider() async {
+    var document = await riderProfileCollection.doc(firebaseUser.uid).get();
+    if (document.exists)
       return Future.value(true);
     else
       return Future.value(false);
@@ -64,7 +85,13 @@ class DatabaseService {
 
   // method to return custom user data object from snapshot
   CustomUser _customUserDataFromSnapshot(DocumentSnapshot snapshot) {
-    return CustomUser.fromMap(snapshot.data());
+    CustomUser customUser = CustomUser(
+        uid: snapshot.get('uid'),
+        fName: snapshot.get('fName'),
+        lName: snapshot.get('lName'),
+        photoUrl: snapshot.get('photoUrl'));
+    Provider.of<AppData>(context, listen: false).updateUserInfo(customUser);
+    return customUser;
   }
 
   // Function to get custom user data from firestore
@@ -113,7 +140,8 @@ class DatabaseService {
       'latitude': destinationLocation.latitude,
       'longitude': destinationLocation.longitude,
       'placeName': destinationLocation.placeName,
-      'stateName': destinationLocation.stateName
+      'stateName': destinationLocation.stateName,
+      'streetHouseName': orderRequest.streetHouseName,
     };
 
     String receiverImageUrl =
@@ -146,8 +174,6 @@ class DatabaseService {
         "deliveryDate": '',
       });
 
-      print(
-          'We\'re in the try block **********************************************************************************************************************************************************should work');
       return Future.value(true);
     } catch (e) {
           return Future.value(false);
@@ -187,5 +213,61 @@ class DatabaseService {
         .orderBy('date', descending: true)
         .get();
     return (userOrderFromSnapshot(snapshot));
+  }
+
+  Future<bool> submitQuery(String title, String description) async {
+    try {
+      await userSupportCollection.add({
+        "userID": firebaseUser.uid,
+        "userPhone": firebaseUser.phoneNumber,
+        "title": title,
+        "description": description,
+      });
+      return Future.value(true);
+    } catch (e) {
+      return Future.value(false);
+    }
+  }
+
+  // method to return notification from snapshot
+  List<OrderNotification> notificationFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return OrderNotification(
+        userID: doc.data()['userID'],
+        title: doc.data()['title'],
+        body: doc.data()['body'],
+        driverInfo: doc.data()['driverInfo'],
+        date: doc.data()['date'],
+        timeStamp: doc.data()['timeStamp'],
+      );
+    }).toList();
+  }
+
+  //Stream to get all the notifications for a particular user
+  Stream<List<OrderNotification>> get notificationStream {
+    return notificationCollection
+        .where('userID', isEqualTo: firebaseUser.uid)
+        .orderBy("date", descending: true)
+        .snapshots()
+        .map(notificationFromSnapshot);
+  }
+
+  // method to return promotion from snapshot
+  List<Promotion> promotionFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return Promotion(
+        title: doc.data()['title'],
+        body: doc.data()['body'],
+        imageUrl: doc.data()['imageUrl'],
+      );
+    }).toList();
+  }
+
+  //Stream to get all recently submitted promotions from firestore
+  Stream<List<Promotion>> get promotionStream {
+    return promotionCollection
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map(promotionFromSnapshot);
   }
 }

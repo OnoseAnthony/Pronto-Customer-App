@@ -5,5 +5,7 @@ String kPaystackPublicKey = "pk_test_598ed7c8d325761a49edd4b6dc8dfd0940702f30";
 double kMapBottomPadding = 0.0;
 double kMapTopPadding = 70.0;
 
-Color kPrimaryColor = Colors.blue[700];
-Color kContainerIconColor = Colors.white;
+Color kPrimaryColor = Color(0xFFFF6600);
+Color kWhiteColor = Colors.white;
+Color kErrorColor = Colors.red;
+Color kBackgroundColor = Color(0xFFF0F3F6);

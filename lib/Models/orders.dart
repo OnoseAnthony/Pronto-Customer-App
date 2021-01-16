@@ -54,6 +54,7 @@ class orderRequest {
   String receiverPhone;
   String receiverInfo;
   String itemDescription;
+  String streetHouseName;
 
   orderRequest({
     this.receiverImage,
@@ -61,6 +62,7 @@ class orderRequest {
     this.receiverPhone,
     this.itemDescription,
     this.receiverInfo,
+    this.streetHouseName,
   });
 }
 
@@ -72,18 +74,26 @@ String getOrderID() {
 }
 
 String getCreationDate() {
-  String day = DateTime
-      .now()
-      .day
-      .toString();
-  String month = DateTime
-      .now()
-      .month
-      .toString();
-  String year = DateTime
-      .now()
-      .year
-      .toString();
+  String day = DateTime.now().day.toString();
+  String month = DateTime.now().month.toString();
+  String year = DateTime.now().year.toString();
   String creatiomDate = '$day $month. $year';
   return creatiomDate;
+}
+
+class OrderNotification {
+  String userID;
+  String title;
+  String body;
+  Map driverInfo;
+  String date;
+  String timeStamp;
+
+  OrderNotification(
+      {this.userID,
+      this.title,
+      this.body,
+      this.driverInfo,
+      this.date,
+      this.timeStamp});
 }
