@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fronto/DataHandler/appData.dart';
 import 'package:fronto/Models/users.dart';
-import 'package:fronto/Screens/onboarding/addEmailAddress.dart';
+import 'package:fronto/Screens/Dashboard/DrawerScreens/editProfile.dart';
 import 'package:fronto/Screens/onboarding/verifyPhoneNumber.dart';
 import 'package:fronto/Screens/wrapper.dart';
 import 'package:fronto/Services/firebase/firestore.dart';
@@ -46,21 +46,14 @@ class AuthService {
             showToast(context, 'Authentication Successful. Please wait',
                 kPrimaryColor, false);
 
-            await DatabaseService(firebaseUser: user, context: context)
-                .updateUserProfileData(
-                    'New',
-                    'User',
-                    '',
-                    await NotificationService(context: context)
-                        .getTokenString());
 
             //provide the user info to the provider
             Provider.of<AppData>(context, listen: false)
                 .updateFirebaseUser(user);
 
-            //GOTO EMAIL SCREEN
+            //GOTO PROFILE SCREEN
             Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => AddEmailAddress()));
+                MaterialPageRoute(builder: (context) => EditProfile(isFromAuth: true,)));
           } else if (user != null &&
               await DatabaseService(firebaseUser: user, context: context)
                       .checkUser() ==
@@ -86,24 +79,34 @@ class AuthService {
             Provider.of<AppData>(context, listen: false)
                 .updateFirebaseUser(user);
 
-            //check if user has email set up
-            if (getCurrentUser().email == null)
+            //check if user has profile  set up
+            if (_customUser == null)
               Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => AddEmailAddress()));
+                  MaterialPageRoute(builder: (context) => EditProfile(isFromAuth: true,)));
             else
               //GOTO HOME SCREEN
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) => Wrapper()));
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Wrapper()));
           } else if (user != null &&
               await DatabaseService(firebaseUser: user, context: context)
                       .checkRider() ==
                   true) {
-            Navigator.pop(context);
 
-            //Since user is found in the rider collection and we are on the customer app we revoke access
-            showToast(context, 'Access Denied!!! Only customers allowed',
-                kErrorColor, true);
-            await signOut();
+            //Since user is found in the rider collection and we are on the customer app we assume the rider wants to register as a customer so we create an instance of the database service to create customer profile
+
+            showToast(context, 'Authentication Successful. Please wait',
+                kPrimaryColor, false);
+
+
+            //provide the user info to the provider
+            Provider.of<AppData>(context, listen: false)
+                .updateFirebaseUser(user);
+
+            //GOTO PROFILE SCREEN
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => EditProfile(isFromAuth: true,)));
           }
         },
         verificationFailed: (FirebaseAuthException exception) {

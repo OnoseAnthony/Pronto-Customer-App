@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fronto/DataHandler/appData.dart';
 import 'package:fronto/Models/users.dart';
-import 'package:fronto/Screens/onboarding/addEmailAddress.dart';
+import 'package:fronto/Screens/Dashboard/DrawerScreens/editProfile.dart';
 import 'package:fronto/Screens/wrapper.dart';
 import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/Services/firebase/firestore.dart';
@@ -153,23 +153,14 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                             kPrimaryColor,
                             false);
 
-                        await DatabaseService(firebaseUser: user)
-                            .updateUserProfileData(
-                                'New',
-                                'User',
-                                '',
-                                await NotificationService(context: context)
-                                    .getTokenString());
 
                         //provide the user info to the provider
                         Provider.of<AppData>(context, listen: false)
                             .updateFirebaseUser(user);
 
-                        //GOTO EMAIL SCREEN
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AddEmailAddress()));
+                        //GOTO PROFILE SCREEN
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) => EditProfile(isFromAuth: true,)));
                       } else if (user != null &&
                           await DatabaseService(
                                       firebaseUser: user, context: context)
@@ -202,31 +193,34 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                             .updateFirebaseUser(user);
 
                         //check if user has email set up
-                        if (AuthService().getCurrentUser().email == null)
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AddEmailAddress()));
+                        if (_customUser == null)
+                          //GOTO PROFILE SCREEN
+                          Navigator.pushReplacement(context,
+                              MaterialPageRoute(builder: (context) => EditProfile(isFromAuth: true,)));
                         else
                           //GOTO HOME SCREEN
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Wrapper()));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Wrapper()));
                       } else if (user != null &&
                           await DatabaseService(
                                       firebaseUser: user, context: context)
                                   .checkRider() ==
                               true) {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
+                        //Since user is found in the rider collection and we are on the customer app we assume the rider wants to register as a customer so we create an instance of the database service to create customer profile
 
-                        showToast(
-                            context,
-                            'Access Denied!!! Only customers can access this app',
-                            kErrorColor,
-                            true);
-                        await AuthService().signOut();
+                        showToast(context, 'Authentication Successful. Please wait',
+                            kPrimaryColor, false);
+
+
+                        //provide the user info to the provider
+                        Provider.of<AppData>(context, listen: false)
+                            .updateFirebaseUser(user);
+
+                        //GOTO PROFILE SCREEN
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) => EditProfile(isFromAuth: true,)));
                       }
                     }
                   },

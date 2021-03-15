@@ -10,7 +10,7 @@ import 'package:fronto/Screens/Dashboard/DrawerScreens/promotion.dart';
 import 'package:fronto/Screens/Dashboard/DrawerScreens/support.dart';
 import 'package:fronto/Screens/Dashboard/DrawerScreens/trackingListScreen.dart';
 import 'package:fronto/Screens/Dashboard/paymentScreen.dart';
-import 'package:fronto/Screens/wrapper.dart';
+import 'package:fronto/Screens/onboarding/getStarted.dart';
 import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/SharedWidgets/buttons.dart';
 import 'package:fronto/SharedWidgets/customListTile.dart';
@@ -41,7 +41,7 @@ buildDrawer(
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => EditProfile()));
+                                builder: (context) => EditProfile(isFromAuth: false,)));
                       },
                       child: buildCustomListTile(
                           Provider.of<AppData>(context, listen: false)
@@ -246,7 +246,7 @@ buildDrawer(
                             Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => Wrapper()),
+                                    builder: (context) => GetStarted()),
                                 (route) => false);
                           else {
                             Navigator.pop(context);

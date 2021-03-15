@@ -147,7 +147,6 @@ class _OrderScreenState extends State<OrderScreen> {
             onTap: () {
               if (_formKey.currentState.validate() &&
                   _staticItemImage != null &&
-                  _staticReceiverImage != null &&
                   Provider.of<AppData>(context, listen: false).pickUpLocation !=
                       null) {
                 orderRequest orderData = orderRequest(
@@ -167,17 +166,12 @@ class _OrderScreenState extends State<OrderScreen> {
               } else if (_staticItemImage == null)
                 showToast(context, 'Please upload a clear photo of the item',
                     kErrorColor, true);
-              else if (_staticReceiverImage == null)
-                showToast(
-                    context,
-                    'Please upload a clear photo of the receiver',
-                    kErrorColor,
-                    true);
+
               else if (Provider.of<AppData>(context, listen: false)
                       .pickUpLocation ==
                   null)
                 showToast(
-                    context, 'Please enter pickup location', kErrorColor, true);
+                    context, 'Invalid Pickup location', kErrorColor, true);
             },
             child: buildSubmitButton('SEND ITEM', 25.0, false),
           ),

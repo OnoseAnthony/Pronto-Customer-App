@@ -1,9 +1,9 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fronto/DataHandler/appData.dart';
 import 'package:fronto/Models/users.dart';
+import 'package:fronto/Screens/wrapper.dart';
 import 'package:fronto/Services/firebase/auth.dart';
 import 'package:fronto/Services/firebase/firestore.dart';
 import 'package:fronto/Services/firebase/pushNotificationService.dart';
@@ -17,6 +17,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class EditProfile extends StatefulWidget {
+  bool isFromAuth;
+  EditProfile({@required this.isFromAuth});
   @override
   _EditProfileState createState() => _EditProfileState();
 }
@@ -41,164 +43,299 @@ class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     double size = MediaQuery.of(context).size.height;
-    customUser = Provider.of<AppData>(context, listen: false).userInfo;
-    return Scaffold(
-      backgroundColor: kWhiteColor,
-      body: Stack(
-        children: [
-          Container(
-            height: size,
-            padding: EdgeInsets.only(left: 40, right: 40, top: size * 0.14),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    InkWell(
-                      onTap: () async {
-                        var image = await ImagePicker.pickImage(
-                            source: ImageSource.gallery, imageQuality: 65);
-                        setState(() {
-                          staticProfileImage = image;
-                        });
-                      },
-                      child: staticProfileImage == null &&
-                              customUser != null &&
-                              customUser.photoUrl != ''
-                          ? Container(
-                              height: 45,
-                              width: 45,
-                              decoration: BoxDecoration(shape: BoxShape.circle),
-                              child: CachedNetworkImage(
-                                imageUrl: customUser.photoUrl,
-                                placeholder: (context, url) => Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        kPrimaryColor),
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    new Icon(Icons.error),
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : staticProfileImage != null
-                              ? buildContainerImage(
-                                  staticProfileImage, Colors.grey[400])
-                              : buildContainerIcon(Icons.person, kPrimaryColor),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    buildTitlenSubtitleText(
-                        customUser != null
-                            ? '${customUser.fName} ${customUser.lName}'
-                            : 'Welcome, User',
-                        Colors.black,
-                        18,
-                        FontWeight.w700,
-                        TextAlign.center,
-                        null),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    buildTextField('First Name', firstNameController, false),
-                    SizedBox(
-                      height: 40,
-                    ),
-                    buildTextField('Last Name', lastNameController, false),
-                    SizedBox(
-                      height: 40,
-                    ),
-                    buildTextField(
-                        AuthService().getCurrentUser().email ?? 'Email Address',
-                        emailAddressController,
-                        false),
-                    SizedBox(
-                      height: 80,
-                    ),
-                    InkWell(
-                      onTap: () async {
-                        if (_formKey.currentState.validate() &&
-                            staticProfileImage != null) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => NavigationLoader(context),
-                          );
+    customUser = widget.isFromAuth ? null : Provider.of<AppData>(context, listen: false).userInfo;
+    if(widget.isFromAuth)
+      return Scaffold(
+        backgroundColor: kWhiteColor,
+        body: Stack(
+          children: [
+            Container(
+              height: size,
+              padding: EdgeInsets.only(left: 40, right: 40, top: size * 0.12),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      InkWell(
+                        onTap: () async {
+                          var image = await ImagePicker.pickImage(
+                              source: ImageSource.gallery, imageQuality: 65);
+                          setState(() {
+                            staticProfileImage = image;
+                          });
+                        },
+                        child: staticProfileImage != null
+                                ? buildContainerImage(
+                                    staticProfileImage, Colors.grey[400])
+                                : buildContainerIcon(Icons.person, kPrimaryColor),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      buildTitlenSubtitleText(
+                          'Update Profile Info',
+                          Colors.black,
+                          18,
+                          FontWeight.w700,
+                          TextAlign.center,
+                          null),
+                      SizedBox(
+                        height: 50,
+                      ),
+                      buildTextField('First Name', firstNameController, false),
+                      SizedBox(
+                        height: 40,
+                      ),
+                      buildTextField('Last Name', lastNameController, false),
+                      SizedBox(
+                        height: 40,
+                      ),
+                      buildTextField(
+                          'Email Address',
+                          emailAddressController,
+                          false),
+                      SizedBox(
+                        height: 80,
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          if (_formKey.currentState.validate() &&
+                              staticProfileImage != null) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => NavigationLoader(context),
+                            );
 
-                          AuthService().updateUserEmailAddress(
-                              emailAddressController.text.trim(), context);
-                          bool isSubmitted = await DatabaseService(
-                                  firebaseUser: AuthService().getCurrentUser(),
-                                  context: context)
-                              .updateUserProfileData(
-                                  firstNameController.text.trim() ??
-                                      customUser.fName,
-                                  lastNameController.text.trim() ??
-                                      customUser.lName,
-                                  await getAndUploadProfileImage(
-                                      staticProfileImage),
-                                  await NotificationService(context: context)
-                                      .getTokenString());
+                            await AuthService().updateUserEmailAddress(
+                                emailAddressController.text.trim(), context);
 
-                          if (isSubmitted) {
-                            Navigator.pop(context);
-                            showToast(context, 'profile updated successfully',
-                                kPrimaryColor, false);
-                          } else {
-                            Navigator.pop(context);
-                            showToast(
-                                context,
-                                'Error occurred. Try again later!!',
-                                kErrorColor,
-                                true);
+                            bool isSubmitted = await DatabaseService(
+                                    firebaseUser: AuthService().getCurrentUser(),
+                                    context: context)
+                                .updateUserProfileData(
+                                    firstNameController.text.trim(),
+                                    lastNameController.text.trim(),
+                                    await getAndUploadProfileImage(
+                                        staticProfileImage),
+                                    await NotificationService(context: context)
+                                        .getTokenString());
+
+                            if (isSubmitted) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Wrapper()));
+                            } else {
+                              Navigator.pop(context);
+                              showToast(
+                                  context,
+                                  'Error occurred. Try again later!!',
+                                  kErrorColor,
+                                  true);
+                            }
+                          } else if (_formKey.currentState.validate() &&
+                              staticProfileImage == null) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => NavigationLoader(context),
+                            );
+
+                            await AuthService().updateUserEmailAddress(
+                                emailAddressController.text.trim(), context);
+                            bool isSubmitted = await DatabaseService(
+                                    firebaseUser: AuthService().getCurrentUser(),
+                                    context: context)
+                                .updateUserProfileData(
+                                    firstNameController.text.trim(),
+                                    lastNameController.text.trim(),
+                                    '',
+                                    await NotificationService(context: context)
+                                        .getTokenString());
+
+                            if (isSubmitted) {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Wrapper()));
+                            } else {
+                              Navigator.pop(context);
+                              showToast(
+                                  context,
+                                  'Error occurred. Try again later!!',
+                                  kErrorColor,
+                                  true);
+                            }
                           }
-                        } else if (_formKey.currentState.validate() &&
-                            staticProfileImage == null) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => NavigationLoader(context),
-                          );
-
-                          AuthService().updateUserEmailAddress(
-                              emailAddressController.text.trim(), context);
-                          bool isSubmitted = await DatabaseService(
-                                  firebaseUser: AuthService().getCurrentUser(),
-                                  context: context)
-                              .updateUserProfileData(
-                                  firstNameController.text.trim() ??
-                                      customUser.fName,
-                                  lastNameController.text.trim() ??
-                                      customUser.lName,
-                                  customUser.photoUrl,
-                                  await NotificationService(context: context)
-                                      .getTokenString());
-
-                          if (isSubmitted) {
-                            Navigator.pop(context);
-                            showToast(context, 'profile updated successfully',
-                                kPrimaryColor, false);
-                          } else {
-                            Navigator.pop(context);
-                            showToast(
-                                context,
-                                'Error occurred. Try again later!!',
-                                kErrorColor,
-                                true);
-                          }
-                        }
-                      },
-                      child: buildSubmitButton('SAVE', 25.0, false),
-                    ),
-                  ],
+                        },
+                        child: buildSubmitButton('NEXT', 25.0, false),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          getDrawerNavigator(context, size, 'Edit Profile'),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    else
+      return Scaffold(
+        backgroundColor: kWhiteColor,
+        body: Stack(
+          children: [
+            Container(
+              height: size,
+              padding: EdgeInsets.only(left: 40, right: 40, top: size * 0.14),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      InkWell(
+                        onTap: () async {
+                          var image = await ImagePicker.pickImage(
+                              source: ImageSource.gallery, imageQuality: 65);
+                          setState(() {
+                            staticProfileImage = image;
+                          });
+                        },
+                        child: staticProfileImage == null &&
+                            customUser != null &&
+                            customUser.photoUrl != ''
+                            ? Container(
+                          height: 45,
+                          width: 45,
+                          decoration: BoxDecoration(shape: BoxShape.circle),
+                          child: CachedNetworkImage(
+                            imageUrl: customUser.photoUrl,
+                            placeholder: (context, url) => Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    kPrimaryColor),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) =>
+                            new Icon(Icons.error),
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                            : staticProfileImage != null
+                            ? buildContainerImage(
+                            staticProfileImage, Colors.grey[400])
+                            : buildContainerIcon(Icons.person, kPrimaryColor),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      buildTitlenSubtitleText(
+                          customUser != null
+                              ? '${customUser.fName} ${customUser.lName}'
+                              : 'Welcome, User',
+                          Colors.black,
+                          18,
+                          FontWeight.w700,
+                          TextAlign.center,
+                          null),
+                      SizedBox(
+                        height: 50,
+                      ),
+                      buildTextField('First Name', firstNameController, false),
+                      SizedBox(
+                        height: 40,
+                      ),
+                      buildTextField('Last Name', lastNameController, false),
+                      SizedBox(
+                        height: 40,
+                      ),
+                      buildTextField(
+                          AuthService().getCurrentUser().email ?? 'Email Address',
+                          emailAddressController,
+                          false),
+                      SizedBox(
+                        height: 80,
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          if (_formKey.currentState.validate() &&
+                              staticProfileImage != null) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => NavigationLoader(context),
+                            );
+
+                            AuthService().updateUserEmailAddress(
+                                emailAddressController.text.trim(), context);
+                            bool isSubmitted = await DatabaseService(
+                                firebaseUser: AuthService().getCurrentUser(),
+                                context: context)
+                                .updateUserProfileData(
+                                firstNameController.text.trim() ??
+                                    customUser.fName,
+                                lastNameController.text.trim() ??
+                                    customUser.lName,
+                                await getAndUploadProfileImage(
+                                    staticProfileImage),
+                                await NotificationService(context: context)
+                                    .getTokenString());
+
+                            if (isSubmitted) {
+                              Navigator.pop(context);
+                              showToast(context, 'profile updated successfully',
+                                  kPrimaryColor, false);
+                            } else {
+                              Navigator.pop(context);
+                              showToast(
+                                  context,
+                                  'Error occurred. Try again later!!',
+                                  kErrorColor,
+                                  true);
+                            }
+                          } else if (_formKey.currentState.validate() &&
+                              staticProfileImage == null) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => NavigationLoader(context),
+                            );
+
+                            AuthService().updateUserEmailAddress(
+                                emailAddressController.text.trim(), context);
+                            bool isSubmitted = await DatabaseService(
+                                firebaseUser: AuthService().getCurrentUser(),
+                                context: context)
+                                .updateUserProfileData(
+                                firstNameController.text.trim() ??
+                                    customUser.fName,
+                                lastNameController.text.trim() ??
+                                    customUser.lName,
+                                customUser.photoUrl,
+                                await NotificationService(context: context)
+                                    .getTokenString());
+
+                            if (isSubmitted) {
+                              Navigator.pop(context);
+                              showToast(context, 'profile updated successfully',
+                                  kPrimaryColor, false);
+                            } else {
+                              Navigator.pop(context);
+                              showToast(
+                                  context,
+                                  'Error occurred. Try again later!!',
+                                  kErrorColor,
+                                  true);
+                            }
+                          }
+                        },
+                        child: buildSubmitButton('SAVE', 25.0, false),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            getDrawerNavigator(context, size, 'Edit Profile'),
+          ],
+        ),
+      );
   }
 }
